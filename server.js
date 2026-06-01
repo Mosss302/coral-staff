@@ -313,6 +313,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── DEBUG: test Apps Script connection ───────────────────────────────────
+  if (pathname === '/api/debug-users' && req.method === 'GET') {
+    const result = await callAppsScript({ type: 'get_users' });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ result, cache: usersCache, fallback: localUsers }));
+    return;
+  }
+
   // ── Proxy Apps Script POST (frontend) ─────────────────────────────────────
   if (pathname === '/api/script' && req.method === 'POST') {
     let body = '';
