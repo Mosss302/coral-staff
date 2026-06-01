@@ -187,6 +187,15 @@ td{padding:11px 16px;vertical-align:middle}
   .chart-row{grid-template-columns:1fr}
   .assess-body{grid-template-columns:1fr}
 }
+.hamburger-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;margin-right:8px;color:var(--gray700);flex-direction:column;gap:5px;align-items:center;justify-content:center}
+.hamburger-btn span{display:block;width:22px;height:2px;background:currentColor;border-radius:2px;transition:all .3s}
+@media(max-width:640px){
+  .hamburger-btn{display:flex}
+  .topbar-title{font-size:14px}
+  .search-input{width:120px}
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+.sidebar-overlay.show{display:block}
 </style>
 </head>
 <body>
@@ -289,8 +298,12 @@ td{padding:11px 16px;vertical-align:middle}
   </div>
 </aside>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="main">
   <div class="topbar">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="topbar-title" id="topbarTitle">Dashboard <span>Overview</span></div>
     <div class="topbar-actions">
       <div class="search-wrap">
@@ -1044,6 +1057,16 @@ function setLang(lang) {
   buildAll();
 }
 
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  const o=document.getElementById('sidebarOverlay');
+  s.classList.toggle('open');
+  o.classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
 function toggleLang() {
   setLang(currentLang === 'en' ? 'th' : 'en');
 }
@@ -1244,6 +1267,7 @@ function showSection(id,btn){
   const subKey   = 'secSub'   + id.charAt(0).toUpperCase() + id.slice(1);
   document.getElementById('topbarTitle').innerHTML=`${tr(titleKey)} <span>${tr(subKey)}</span>`;
   if(id==='users')loadUsers();
+  if(window.innerWidth<=640)closeSidebar();
 }
 
 // ── HELPERS ──
