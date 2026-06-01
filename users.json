@@ -4,5 +4,29 @@
     "password": "Mossenka123@",
     "role": "admin",
     "displayName": "Admin"
+  },
+  {
+    "username": "Sudarat D.",
+    "password": "41277",
+    "role": "staff",
+    "displayName": "Sudarat D."
+  },
+  {
+    "username": "Xavier",
+    "password": "41521",
+    "role": "staff",
+    "displayName": "Ling dodiwa"
+  },
+  {
+    "username": "Veerada",
+    "password": "Bby@39193",
+    "role": "staff",
+    "displayName": "Verandafung"
+  },
+  {
+    "username": "Nutnaree",
+    "password": "19971302",
+    "role": "staff",
+    "displayName": "Topfycake"
   }
 ]
