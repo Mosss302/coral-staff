@@ -245,6 +245,7 @@ const server = http.createServer(async (req, res) => {
       if (!username) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ success: false, message: 'Username is required' })); return; }
       if (!password || password.length < 4) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ success: false, message: 'Password must be at least 4 characters' })); return; }
       const result = await callAppsScript({ type: 'add_user', username, password, role: role || 'staff', displayName: displayName || username });
+      console.log('[add_user] result:', JSON.stringify(result));
       if (!result || result.status !== 'ok') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: result ? result.msg : 'Failed to add user' }));
