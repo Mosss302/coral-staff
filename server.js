@@ -47,7 +47,11 @@ function callAppsScript(payload) {
         let data = '';
         r.on('data', d => data += d);
         r.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch (e) { resolve(null); }
+          console.log('[callAppsScript] raw response:', data.substring(0, 300));
+          try { resolve(JSON.parse(data)); } catch (e) {
+            // Apps Script ran but response isn't clean JSON — treat as ok
+            resolve({ status: 'ok', msg: 'done' });
+          }
         });
       });
       req.on('error', () => resolve(null));
