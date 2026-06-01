@@ -2400,7 +2400,12 @@ async function saveAddUser() {
     const data = await r.json();
     if (data.success) {
       msg.style.color = 'var(--green)'; msg.textContent = tr('userSaveOk');
-      setTimeout(() => { closeAddUserModal(); loadUsers(); }, 800);
+      // แสดงทันที (optimistic update)
+      usersData.push({ displayName: body.displayName || body.username, username: body.username, role: body.role });
+      renderUsers();
+      closeAddUserModal();
+      // รีโหลดจาก Sheet หลัง 3 วินาที เพื่อ sync
+      setTimeout(() => loadUsers(), 3000);
     } else {
       msg.style.color = 'var(--red)'; msg.textContent = tr('userSaveFail') + data.message;
     }
