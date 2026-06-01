@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>The Coral — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --gold:#b07a00;--gold-light:#f5ecd7;--gold-mid:#d4a017;--gold-dark:#8a5e00;
+      --gray100:#f3f4f6;--gray200:#e5e7eb;--gray300:#d1d5db;
+      --gray400:#9ca3af;--gray500:#6b7280;--gray700:#374151;--gray900:#111827;
+      --white:#ffffff;--red:#dc2626;--red-light:#fee2e2;
+    }
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Sarabun',sans-serif;display:flex;min-height:100vh}
+
+    /* ── Left Panel ── */
+    .left-panel{
+      width:55%;
+      background:linear-gradient(145deg,#7a5000 0%,#b07a00 40%,#d4a017 75%,#e8b94a 100%);
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:60px 56px;
+      position:relative;
+      overflow:hidden;
+    }
+    .left-panel::before{
+      content:'';position:absolute;
+      width:400px;height:400px;border-radius:50%;
+      background:rgba(255,255,255,.05);
+      top:-100px;left:-100px;
+    }
+    .left-panel::after{
+      content:'';position:absolute;
+      width:300px;height:300px;border-radius:50%;
+      background:rgba(0,0,0,.06);
+      bottom:-80px;right:-60px;
+    }
+    .left-panel .circle-mid{
+      position:absolute;
+      width:200px;height:200px;border-radius:50%;
+      background:rgba(255,255,255,.04);
+      top:50%;left:60%;transform:translate(-50%,-50%);
+    }
+    .brand{position:relative;z-index:1;text-align:center;margin-bottom:48px}
+    .brand-logo{
+      width:220px;height:auto;
+      filter:brightness(0) invert(1);
+      opacity:.95;
+    }
+    .brand-tag{
+      font-size:11px;letter-spacing:4px;text-transform:uppercase;
+      color:rgba(255,255,255,.7);margin-top:12px;font-weight:500;
+    }
+    .brand-divider{
+      width:48px;height:2px;
+      background:rgba(255,255,255,.4);
+      margin:14px auto 0;border-radius:1px;
+    }
+    .tagline{position:relative;z-index:1;text-align:center;color:#fff}
+    .tagline h2{
+      font-size:28px;font-weight:700;line-height:1.3;
+      margin-bottom:14px;
+      text-shadow:0 2px 12px rgba(0,0,0,.15);
+    }
+    .tagline p{
+      font-size:14px;color:rgba(255,255,255,.75);
+      line-height:1.7;max-width:320px;
+    }
+    .stats{
+      position:relative;z-index:1;
+      display:flex;gap:40px;margin-top:48px;
+    }
+    .stat{text-align:center;color:#fff}
+    .stat-num{font-size:28px;font-weight:700;line-height:1}
+    .stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:4px}
+
+    /* ── Right Panel ── */
+    .right-panel{
+      width:45%;
+      background:#fff;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:60px 56px;
+    }
+    .right-inner{width:100%;max-width:340px}
+
+    .logo-icon{
+      width:160px;height:auto;
+      margin-bottom:24px;
+      filter: brightness(0) saturate(100%) invert(40%) sepia(60%) saturate(500%) hue-rotate(5deg) brightness(80%);
+    }
+
+    .form-title{font-size:24px;font-weight:700;color:var(--gray900);margin-bottom:6px}
+    .form-sub{font-size:14px;color:var(--gray400);margin-bottom:32px}
+
+    .error-box{
+      background:var(--red-light);border:1px solid #fca5a5;
+      border-radius:10px;padding:10px 14px;
+      font-size:13px;color:var(--red);
+      margin-bottom:20px;
+      display:none;align-items:center;gap:8px;
+    }
+    .error-box.visible{display:flex}
+
+    .form-group{margin-bottom:20px}
+    .form-label{
+      display:block;font-size:13px;font-weight:600;
+      color:var(--gray700);margin-bottom:7px;
+    }
+    .input-wrap{position:relative}
+    .form-input{
+      width:100%;padding:12px 14px;
+      border:1.5px solid var(--gray200);
+      border-radius:10px;font-size:14px;
+      font-family:'Sarabun',sans-serif;
+      color:var(--gray900);background:#fff;
+      transition:border-color .2s,box-shadow .2s;
+      outline:none;
+    }
+    .form-input:focus{
+      border-color:var(--gold);
+      box-shadow:0 0 0 3px rgba(176,122,0,.1);
+    }
+    .form-input.has-toggle{padding-right:44px}
+    .form-input.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+    .toggle-pw{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;
+      color:var(--gray400);font-size:15px;padding:4px;
+      transition:color .15s;line-height:1;
+    }
+    .toggle-pw:hover{color:var(--gold)}
+
+    .btn-login{
+      width:100%;padding:13px;
+      background:linear-gradient(135deg,var(--gold-dark),var(--gold-mid));
+      color:#fff;border:none;border-radius:10px;
+      font-size:15px;font-weight:700;
+      font-family:'Sarabun',sans-serif;
+      cursor:pointer;transition:all .2s;
+      letter-spacing:.3px;
+      box-shadow:0 4px 16px rgba(176,122,0,.25);
+      margin-top:4px;
+    }
+    .btn-login:hover{
+      background:linear-gradient(135deg,#7a5200,var(--gold));
+      box-shadow:0 6px 20px rgba(176,122,0,.35);
+      transform:translateY(-1px);
+    }
+    .btn-login:active{transform:translateY(0)}
+    .btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-loading{display:none}
+    .btn-login.loading .btn-text{display:none}
+    .btn-login.loading .btn-loading{display:inline}
+
+    .footer-note{
+      text-align:center;font-size:11px;color:var(--gray300);
+      margin-top:28px;
+    }
+
+    /* Mobile */
+    @media(max-width:768px){
+      body{flex-direction:column;overflow:auto}
+      .left-panel{width:100%;padding:40px 32px;min-height:220px}
+      .brand-logo{font-size:44px}
+      .tagline h2{font-size:20px}
+      .stats{gap:24px;margin-top:28px}
+      .right-panel{width:100%;padding:40px 32px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left decorative panel -->
+  <div class="left-panel">
+    <div class="circle-mid"></div>
+
+    <div class="brand">
+      <img src="/logo.svg" class="brand-logo" alt="The Coral"/>
+      <div class="brand-tag">Staff Management System</div>
+      <div class="brand-divider"></div>
+    </div>
+
+    <div class="tagline">
+      <h2>Manage your team<br>with ease.</h2>
+      <p>Track performance, manage schedules, and keep your team organized — all in one place.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">CS</div>
+        <div class="stat-label">Tracker</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">📊</div>
+        <div class="stat-label">Dashboard</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Real-time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right login panel -->
+  <div class="right-panel">
+    <div class="right-inner">
+
+      <img src="/logo.svg" class="logo-icon" alt="The Coral"/>
+
+      <div class="form-title">Welcome back</div>
+      <div class="form-sub">Sign in to The Coral Staff Management</div>
+
+      <div class="error-box" id="errorBox">
+        <span>⚠️</span>
+        <span id="errorMsg">Invalid username or password</span>
+      </div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input class="form-input" type="text" id="username" name="username"
+            placeholder="Enter your username" autocomplete="username" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <input class="form-input has-toggle" type="password" id="password" name="password"
+              placeholder="Enter your password" autocomplete="current-password" required/>
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Show/hide password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loading">Signing in…</span>
+        </button>
+      </form>
+
+      <div class="footer-note">🔒 Secure · The Coral Hotel &amp; Residence</div>
+    </div>
+  </div>
+
+  <script>
+    const form     = document.getElementById('loginForm');
+    const errorBox = document.getElementById('errorBox');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = document.getElementById('loginBtn');
+    const togglePw = document.getElementById('togglePw');
+    const pwInput  = document.getElementById('password');
+    const unInput  = document.getElementById('username');
+    let pwVisible  = false;
+
+    togglePw.addEventListener('click', () => {
+      pwVisible = !pwVisible;
+      pwInput.type = pwVisible ? 'text' : 'password';
+      togglePw.textContent = pwVisible ? '🙈' : '👁️';
+    });
+
+    // Clear error on typing
+    [unInput, pwInput].forEach(el => el.addEventListener('input', () => {
+      errorBox.classList.remove('visible');
+      el.classList.remove('error');
+    }));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.remove('visible');
+      loginBtn.classList.add('loading');
+      loginBtn.disabled = true;
+
+      const username = unInput.value.trim();
+      const password = pwInput.value;
+
+      try {
+        const res  = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = '/';
+        } else {
+          errorMsg.textContent = 'Incorrect username or password. Please try again.';
+          errorBox.classList.add('visible');
+          unInput.classList.add('error');
+          pwInput.classList.add('error');
+          pwInput.value = '';
+          loginBtn.classList.remove('loading');
+          loginBtn.disabled = false;
+          unInput.focus();
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Connection error. Please try again.';
+        errorBox.classList.add('visible');
+        loginBtn.classList.remove('loading');
+        loginBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

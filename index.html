@@ -1,0 +1,2489 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>The Coral — Staff Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#b07a00;--gold-light:#f5ecd7;--gold-mid:#d4a017;
+  --teal:#0d9488;--teal-light:#ccfbf1;
+  --red:#dc2626;--red-light:#fee2e2;
+  --green:#16a34a;--green-light:#dcfce7;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --blue:#2563eb;--blue-light:#dbeafe;
+  --bg:#f4f5f7;--sidebar-w:256px;--white:#ffffff;
+  --gray50:#f9fafb;--gray100:#f3f4f6;--gray200:#e5e7eb;
+  --gray300:#d1d5db;--gray400:#9ca3af;--gray500:#6b7280;
+  --gray700:#374151;--gray900:#111827;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 2px 8px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.12);
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--gray900);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--white);border-right:1px solid var(--gray200);position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:50;box-shadow:2px 0 12px rgba(0,0,0,.06)}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--gray100);display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.logo-img{width:140px;height:auto;display:block}
+.logo-sub{font-size:10px;color:var(--gray400);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.nav-section-label{font-size:10px;font-weight:600;color:var(--gray400);letter-spacing:1px;text-transform:uppercase;padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--gray500);font-size:14px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'Sarabun',sans-serif}
+.nav-item:hover{background:var(--gray100);color:var(--gray900)}
+.nav-item.active{background:var(--gold-light);color:var(--gold)}
+.nav-item .nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-item .nav-badge{margin-left:auto;font-size:11px;font-weight:600;background:var(--gray100);color:var(--gray500);padding:1px 7px;border-radius:20px}
+.nav-item.active .nav-badge{background:rgba(176,122,0,.15);color:var(--gold)}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--gray100);font-size:11px;color:var(--gray400)}
+.sidebar-footer .refresh-time{font-weight:500;color:var(--gray500)}
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--gray200);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:var(--shadow-sm)}
+.topbar-title{font-size:16px;font-weight:600;color:var(--gray900)}
+.topbar-title span{color:var(--gray400);font-weight:400;font-size:13px;margin-left:8px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.search-input{border:1px solid var(--gray200);border-radius:var(--radius-sm);padding:7px 14px 7px 36px;font-size:13px;outline:none;width:220px;background:var(--gray50);color:var(--gray900);font-family:'Sarabun',sans-serif;transition:border .2s}
+.search-input:focus{border-color:var(--gold);background:var(--white)}
+.search-wrap{position:relative}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none}
+.btn{padding:7px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Sarabun',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:var(--white)}
+.btn-gold:hover{background:var(--gold-mid)}
+.btn-outline{background:var(--white);color:var(--gray700);border:1px solid var(--gray200)}
+.btn-outline:hover{background:var(--gray50)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.refresh-btn{background:var(--white);border:1px solid var(--gray200);color:var(--gray500)}
+.refresh-btn:hover{border-color:var(--teal);color:var(--teal)}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.content{padding:24px 28px}
+.section{display:none}
+.section.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);border:1px solid var(--gray200);transition:box-shadow .2s}
+.kpi-card:hover{box-shadow:var(--shadow)}
+.kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.kpi-label{font-size:12px;color:var(--gray500);font-weight:500}
+.kpi-value{font-size:28px;font-weight:700;margin:4px 0 2px;color:var(--gray900)}
+.kpi-sub{font-size:11px;color:var(--gray400)}
+.kpi-bar{height:3px;background:var(--gray100);border-radius:2px;margin-top:10px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray200);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--gray100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.card-title{font-size:14px;font-weight:600;color:var(--gray900)}
+.card-title-count{color:var(--gray400);font-weight:400}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.filter-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--gray200);background:var(--white);color:var(--gray500);transition:all .15s;font-family:'Sarabun',sans-serif}
+.filter-chip:hover{border-color:var(--gold);color:var(--gold)}
+.filter-chip.active{background:var(--gold);border-color:var(--gold);color:var(--white)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);background:var(--gray50);white-space:nowrap;border-bottom:1px solid var(--gray200);cursor:pointer;letter-spacing:.3px;text-transform:uppercase}
+thead th:hover{color:var(--gray900)}
+tbody tr{border-bottom:1px solid var(--gray100);transition:background .12s}
+tbody tr:hover{background:var(--gray50)}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 16px;vertical-align:middle}
+.td-name{font-weight:600;color:var(--gray900)}
+.td-sub{font-size:11px;color:var(--gray400);margin-top:1px;font-family:monospace}
+.card-footer{padding:12px 20px;border-top:1px solid var(--gray100);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray500)}
+.page-btns{display:flex;gap:4px}
+.page-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--gray200);background:var(--white);color:var(--gray500);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.page-btn:hover,.page-btn.active{background:var(--gold);border-color:var(--gold);color:var(--white)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;gap:4px}
+.badge-gold{background:var(--gold-light);color:var(--gold)}
+.badge-teal{background:var(--teal-light);color:var(--teal)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-gray{background:var(--gray100);color:var(--gray500)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.pos-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.test-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.test-pass{background:var(--green-light);color:var(--green)}
+.test-fail{background:var(--red-light);color:var(--red)}
+.test-done{background:var(--amber-light);color:var(--amber)}
+.test-na{background:var(--gray100);color:var(--gray400)}
+.days-mini{display:flex;align-items:center;gap:6px}
+.days-track{width:60px;height:4px;background:var(--gray200);border-radius:2px;overflow:hidden}
+.days-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--gold))}
+.milestone-row{display:flex;gap:8px;flex-wrap:wrap}
+.chart-row{display:grid;grid-template-columns:1.8fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm)}
+.chart-title{font-size:13px;font-weight:600;color:var(--gray900);margin-bottom:16px}
+.chart-title span{color:var(--gray400);font-weight:400}
+.chart-wrap{position:relative;height:200px}
+.assessment-grid{display:grid;gap:14px}
+.assess-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+.assess-header{padding:14px 18px;background:var(--gray50);border-bottom:1px solid var(--gray100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.assess-name{font-size:14px;font-weight:600}
+.assess-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.assess-section-title{font-size:10px;font-weight:700;color:var(--gray400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.milestone-list{display:flex;flex-direction:column;gap:6px}
+.milestone-item{display:flex;align-items:flex-start;gap:8px}
+.ms-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ms-dot-done{background:var(--green)}
+.ms-dot-pend{background:var(--amber)}
+.ms-dot-none{background:var(--gray300)}
+.ms-day{font-size:12px;font-weight:600;color:var(--gray700);white-space:nowrap}
+.ms-date{font-size:11px;color:var(--gray500)}
+.ms-comment{font-size:11px;color:var(--gray600);margin-top:2px;line-height:1.4}
+.test-block{display:flex;flex-direction:column;gap:8px}
+.test-row-item{background:var(--gray50);border-radius:8px;padding:8px 10px;border:1px solid var(--gray100)}
+.test-row-item .tr-label{font-size:10px;font-weight:700;color:var(--gray400);text-transform:uppercase;margin-bottom:4px}
+.test-row-item .tr-date{font-size:12px;font-weight:600}
+.test-row-item .tr-comment{font-size:11px;color:var(--gray500);margin-top:3px;line-height:1.4}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius);width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--gray100);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{font-size:16px;font-weight:600}
+.modal-close{width:30px;height:30px;border-radius:6px;background:var(--gray100);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--gray500)}
+.modal-close:hover{background:var(--gray200)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray100);display:flex;justify-content:flex-end;gap:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:span 2}
+.form-label{font-size:12px;font-weight:600;color:var(--gray600)}
+.form-input,.form-select,.form-textarea{border:1px solid var(--gray200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--gray900);font-family:'Sarabun',sans-serif;outline:none;transition:border .2s;background:var(--white)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold)}
+.form-textarea{min-height:70px;resize:vertical}
+.form-section{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px;border-top:1px solid var(--gray100);margin-top:4px}
+.gs-link-note{background:var(--gold-light);border:1px solid #f0d89a;border-radius:8px;padding:10px 14px;font-size:12px;color:#7a5500;margin-top:12px}
+.loading-overlay{position:fixed;inset:0;background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
+.loading-overlay.hidden{display:none}
+.loading-logo{width:200px;height:auto}
+.loading-bar{width:200px;height:3px;background:var(--gray100);border-radius:2px;overflow:hidden}
+.loading-bar-fill{height:100%;background:var(--gold);animation:loadAnim 1.5s ease-in-out infinite}
+@keyframes loadAnim{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+.loading-text{font-size:13px;color:var(--gray400)}
+.empty-state{text-align:center;padding:48px;color:var(--gray400)}
+.empty-icon{font-size:40px;margin-bottom:8px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--gray100)}
+::-webkit-scrollbar-thumb{background:var(--gray300);border-radius:3px}
+.cal-wrap{max-width:560px;margin:0 auto}
+.cal-day-label{font-size:10px;font-weight:700;color:var(--gray400);padding:4px 0;text-transform:uppercase}
+.cal-day{height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:12px;font-weight:500;cursor:default;position:relative;transition:background .15s;padding:2px}
+.cal-day:hover{background:var(--gray100)}
+.cal-day.other-month{color:var(--gray300)}
+.cal-day.today{background:var(--gold-light);color:var(--gold);font-weight:700}
+.cal-day.has-test{background:var(--teal-light);color:var(--teal);font-weight:700;cursor:pointer}
+.cal-day.has-test:hover{background:#99f6e4}
+.cal-day.has-test-past{background:var(--gray100);color:var(--gray400);font-weight:600;cursor:pointer}
+.cal-day.has-test-past:hover{background:var(--gray200)}
+.cal-day.today.has-test{background:#fef08a;color:#92400e;font-weight:800}
+.cal-count{font-size:9px;font-weight:700;color:var(--teal);line-height:1}
+.error-banner{background:var(--red-light);border:1px solid #fca5a5;border-radius:var(--radius-sm);padding:10px 16px;margin-bottom:16px;font-size:13px;color:var(--red);display:none}
+.error-banner.show{display:block}
+@media(max-width:640px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .chart-row{grid-template-columns:1fr}
+  .assess-body{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="logo.svg" class="loading-logo" alt="The Coral"/>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-text" id="loadingText">Loading data...</div>
+</div>
+
+<div class="modal-overlay" id="editModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Edit</h3>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <div id="modalSaveMsg" style="font-size:12px;flex:1;display:none"></div>
+      <button class="btn btn-outline" id="modalCancelBtn" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-gold" id="modalSaveBtn" onclick="saveModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSESSMENT FORM MODAL -->
+<div class="modal-overlay" id="assessFormModal" onclick="if(event.target.id==='assessFormModal')closeAssessForm()">
+  <div class="modal" style="width:820px;max-width:97vw">
+    <div class="modal-head">
+      <h3 id="assessFormTitle">📋 Daily Report Assessment</h3>
+      <button class="modal-close" onclick="closeAssessForm()">✕</button>
+    </div>
+    <div class="modal-body" id="assessFormBody" style="padding:16px 24px"></div>
+    <div class="modal-footer">
+      <div id="assessFormMsg" style="font-size:12px;flex:1;display:none"></div>
+      <button class="btn btn-outline" id="assessFormCancelBtn" onclick="closeAssessForm()">Cancel</button>
+      <button class="btn btn-gold" id="assessFormSaveBtn" onclick="saveAssessForm()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Assessment
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="leaveDetailModal" onclick="if(event.target.id==='leaveDetailModal')document.getElementById('leaveDetailModal').classList.remove('open')">
+  <div class="modal" style="width:760px;max-width:96vw">
+    <div class="modal-head">
+      <h3 id="leaveDetailTitle">Leave Details</h3>
+      <button class="modal-close" onclick="document.getElementById('leaveDetailModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="leaveDetailBody" style="padding:16px 20px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="leaveDetailCloseBtn" onclick="document.getElementById('leaveDetailModal').classList.remove('open')">Close</button>
+      <button class="btn btn-gold" id="leaveDetailSheetsBtn" onclick="window.open(GS_BASE+'?gid='+GID_STAFF,'_blank')">Open in Google Sheets</button>
+    </div>
+  </div>
+</div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.svg" alt="The Coral" class="logo-img"/>
+    <div class="logo-sub">Staff Management</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label" data-i18n="navMain">MAIN MENU</div>
+    <button class="nav-item active" onclick="showSection('dashboard',this)">
+      <span class="nav-icon">📊</span> <span data-i18n="navDashboard">Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="showSection('staff',this)">
+      <span class="nav-icon">👥</span> <span data-i18n="navStaff">Staff</span>
+      <span class="nav-badge" id="badge-staff">—</span>
+    </button>
+    <button class="nav-item" onclick="showSection('trainee',this)">
+      <span class="nav-icon">🎓</span> <span data-i18n="navTrainee">Trainee</span>
+      <span class="nav-badge" id="badge-trainee">—</span>
+    </button>
+    <div class="nav-section-label" style="margin-top:8px" data-i18n="navData">DATA</div>
+    <button class="nav-item" onclick="showSection('assessment',this)">
+      <span class="nav-icon">📝</span> <span data-i18n="navAssessment">Assessment</span>
+      <span class="nav-badge" id="badge-assess">—</span>
+    </button>
+    <button class="nav-item" onclick="showSection('leave',this)">
+      <span class="nav-icon">📅</span> <span data-i18n="navLeave">Leave & Absence</span>
+      <span class="nav-badge" id="badge-leave">—</span>
+    </button>
+    <div class="nav-section-label" id="nav-admin-label" style="margin-top:8px;display:none" data-i18n="navAdmin">ADMIN</div>
+    <button class="nav-item" id="nav-users-btn" style="display:none" onclick="showSection('users',this)">
+      <span class="nav-icon">🔐</span> <span data-i18n="navUsers">User Management</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout" style="display:flex;align-items:center;gap:8px;padding:8px 12px;color:#ef4444;font-size:12px;text-decoration:none;border-radius:6px;cursor:pointer;margin-bottom:10px;transition:background .15s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+      <span>🚪</span> <span data-i18n="btnLogout">Logout</span>
+    </a>
+    <div data-i18n="lastUpdated">Last Updated</div>
+    <div class="refresh-time" id="refreshTime">—</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard <span>Overview</span></div>
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <input class="search-input" id="globalSearch" type="text" placeholder="Search name / ID..." oninput="handleSearch(this.value)"/>
+      </div>
+      <button class="btn refresh-btn" id="refreshBtn" onclick="refreshAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span data-i18n="btnRefresh">Refresh</span>
+      </button>
+      <button class="btn btn-outline btn-sm" id="langToggleBtn" onclick="toggleLang()" style="font-weight:700;letter-spacing:.5px;min-width:68px">
+        <span id="langToggleLabel"><b>EN</b> | TH</span>
+      </button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="error-banner" id="errorBanner"></div>
+
+    <section class="section active" id="sec-dashboard">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title" data-i18n-html="chartStaffByPos">Staff by Position <span>— All of Staff</span></div>
+          <div class="chart-wrap"><canvas id="posChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title" data-i18n-html="chartTestResult">Test Results <span>— CS Tracker</span></div>
+          <div class="chart-wrap"><canvas id="testChart"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-row" style="grid-template-columns:1fr 1fr">
+        <div class="chart-card">
+          <div class="chart-title" data-i18n-html="chartLeaveByType">Leave by Type <span>— Total</span></div>
+          <div class="chart-wrap"><canvas id="leaveChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title" data-i18n-html="chartWorkingDays">Working Days (Top 8) <span>— All of Staff</span></div>
+          <div class="chart-wrap"><canvas id="daysChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-staff">
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1">
+            <div class="card-title"><span data-i18n="staffListTitle">Staff List</span> <span class="card-title-count" id="staffCountLabel"></span></div>
+            <button class="btn btn-gold btn-sm" id="addStaffBtn" onclick="openAddModal('staff')">＋ <span data-i18n="btnAddStaff">Add Staff</span></button>
+          </div>
+          <div class="filter-row" id="posFilters"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th onclick="sortStaff('no')" data-i18n="thNo">No.</th>
+              <th onclick="sortStaff('name')" data-i18n="thName">Name</th>
+              <th data-i18n="thPosition">Position</th>
+              <th onclick="sortStaff('start')" data-i18n="thStartDate">Start Date</th>
+              <th onclick="sortStaff('days')" data-i18n="thWorkingDays">Working Days</th>
+              <th data-i18n="thStatus">Status</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="staffBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <span id="staffPageInfo"></span>
+          <div class="page-btns" id="staffPageBtns"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-trainee">
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1">
+            <div class="card-title"><span data-i18n="traineeListTitle">Trainee</span> <span class="card-title-count" id="traineeCountLabel"></span></div>
+            <button class="btn btn-gold btn-sm" id="addTraineeBtn" onclick="openAddModal('trainee')">＋ <span data-i18n="btnAddTrainee">Add Trainee</span></button>
+          </div>
+          <div class="filter-row" id="traineePosFilters"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-i18n="thNo">No.</th>
+              <th data-i18n="thName">Name</th>
+              <th data-i18n="thPosition">Position</th>
+              <th data-i18n="thStartDate">Start Date</th>
+              <th data-i18n="thEndDate">End Date</th>
+              <th data-i18n="thWorkingDays">Working Days</th>
+              <th data-i18n="thStatus">Status</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="traineeBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <span id="traineePageInfo"></span>
+          <div class="page-btns" id="traineePageBtns"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-assessment">
+      <div class="kpi-grid" id="assessKpiGrid"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title" data-i18n-prefix="📅 " data-i18n="calTitle">📅 Exam Schedule</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-outline btn-sm" onclick="calPrev()">‹</button>
+            <span id="calMonthLabel" style="font-size:13px;font-weight:600;min-width:120px;text-align:center"></span>
+            <button class="btn btn-outline btn-sm" onclick="calNext()">›</button>
+          </div>
+        </div>
+        <div style="padding:10px 16px">
+          <div class="cal-wrap">
+            <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center"></div>
+          </div>
+          <div id="calLegend" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:11px"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header" style="flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1">
+            <div class="card-title"><span data-i18n="assessCardTitle">Staff Assessment</span> <span class="card-title-count" id="assessCountLabel"></span></div>
+            <input id="assessIdSearch" class="search-input" style="width:180px;padding-left:12px" type="text" placeholder="Search ID / Name..." oninput="applyAssessFilter()"/>
+          </div>
+          <div class="filter-row" id="assessFilterRow">
+            <button class="filter-chip active" onclick="filterAssess(this,'')" data-i18n="filterAll">All</button>
+            <button class="filter-chip" onclick="filterAssess(this,'waiting')" data-i18n="filterWaiting">⏳ Waiting</button>
+            <button class="filter-chip" onclick="filterAssess(this,'upcoming')" data-i18n="filterUpcoming">📌 Upcoming</button>
+            <button class="filter-chip" onclick="filterAssess(this,'pass1')" data-i18n="filterPass1">✓ T1 Pass</button>
+            <button class="filter-chip" onclick="filterAssess(this,'pass12')" data-i18n="filterPass12">✓ T1+T2 Pass</button>
+            <button class="filter-chip" onclick="filterAssess(this,'fail')" data-i18n="filterFail">✗ Fail</button>
+          </div>
+        </div>
+      </div>
+      <div class="assessment-grid" id="assessGrid"></div>
+    </section>
+
+    <section class="section" id="sec-leave">
+      <div class="kpi-grid" id="leaveKpiGrid"></div>
+      <div class="card">
+        <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div class="card-title"><span data-i18n="leaveCardTitle">Leave & Absence Data</span> <span class="card-title-count" id="leaveCountLabel"></span></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:11px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.5px;margin-right:2px" data-i18n="labelPosition">Position:</span>
+            <div class="filter-row" id="leavePosFilters"></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:11px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.5px;margin-right:2px" data-i18n="labelType">Type:</span>
+            <div class="filter-row" id="leaveTypeFilters">
+              <button class="filter-chip active" onclick="filterLeaveType(this,'')" data-i18n="filterAll">All</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'swd')">SWD</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'swo')">SWO</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'sl')">S/L</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'wop')">WOP</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'wip')">WIP</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'l')">L</button>
+              <button class="filter-chip" onclick="filterLeaveType(this,'v')">V</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-i18n="thName">Name</th><th data-i18n="thPosition">Position</th>
+              <th title="SWD">SWD</th><th title="SWO">SWO</th><th title="S/L">S/L</th>
+              <th title="WOP">WOP</th><th title="WIP">WIP</th><th title="L">L</th><th title="V">V</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="leaveBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <span id="leavePageInfo"></span>
+          <div class="page-btns" id="leavePageBtns"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sec-users">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" data-i18n="userMgmt">User Management</div>
+          <button class="btn btn-gold btn-sm" onclick="openAddUserModal()">＋ <span data-i18n="addUser">Add User</span></button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-i18n="thNo">No.</th>
+              <th data-i18n="thDisplayName">Display Name</th>
+              <th data-i18n="thUsername">Username</th>
+              <th data-i18n="thRole">Role</th>
+              <th data-i18n="thActions">Actions</th>
+            </tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal" onclick="if(event.target.id==='addUserModal')closeAddUserModal()">
+  <div class="modal" style="width:480px">
+    <div class="modal-head">
+      <h3 data-i18n="addUser">Add User</h3>
+      <button class="modal-close" onclick="closeAddUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formDisplayName">Display Name</label>
+          <input class="form-input" id="au_displayName" type="text" placeholder="e.g. John Doe"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formUsername">Username *</label>
+          <input class="form-input" id="au_username" type="text" placeholder="e.g. john"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formPassword">Password *</label>
+          <div style="position:relative">
+            <input class="form-input" id="au_password" type="password" style="width:100%;padding-right:40px"/>
+            <button type="button" onclick="togglePw('au_password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray400);font-size:14px">👁</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formRole">Role</label>
+          <select class="form-select" id="au_role">
+            <option value="staff">staff</option>
+            <option value="manager">manager</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+      </div>
+      <div id="au_msg" style="margin-top:10px;font-size:12px;display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddUserModal()" data-i18n="modalCancel">Cancel</button>
+      <button class="btn btn-gold" onclick="saveAddUser()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span data-i18n="addUser">Add User</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editUserModal" onclick="if(event.target.id==='editUserModal')closeEditUserModal()">
+  <div class="modal" style="width:480px">
+    <div class="modal-head">
+      <h3 data-i18n="editUser">Edit User</h3>
+      <button class="modal-close" onclick="closeEditUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formDisplayName">Display Name</label>
+          <input class="form-input" id="eu_displayName" type="text"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label" data-i18n="formPasswordOpt">Password (leave blank to keep)</label>
+          <div style="position:relative">
+            <input class="form-input" id="eu_password" type="password" style="width:100%;padding-right:40px" placeholder=""/>
+            <button type="button" onclick="togglePw('eu_password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray400);font-size:14px">👁</button>
+          </div>
+        </div>
+        <div class="form-group full" id="eu_role_group">
+          <label class="form-label" data-i18n="formRole">Role</label>
+          <select class="form-select" id="eu_role">
+            <option value="staff">staff</option>
+            <option value="manager">manager</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+      </div>
+      <div id="eu_msg" style="margin-top:10px;font-size:12px;display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeEditUserModal()" data-i18n="modalCancel">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditUser()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span data-i18n="modalSave">Save</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+const SHEET_ID='1H4RHKQPWvTPEfMLw6r9acN0z7FOT8TbfDJYFSjr0EVs';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxbFD9NJZrDLImACAMiqMy_-1DMCPCPC4Zk4n-6U92QAoN2ej81YE-8rnR4eVGoHy9p0w/exec';
+const GID_STAFF='1141876646';
+const GID_TRACKER='1276252251';
+const GID_TRAINEE='792916917';
+const GS_BASE=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+
+// ── LANGUAGE ──
+let currentLang = 'en';
+
+const LANG = {
+  en: {
+    // Nav
+    navMain: 'MAIN MENU',
+    navDashboard: 'Dashboard',
+    navStaff: 'Staff',
+    navTrainee: 'Trainee',
+    navData: 'DATA',
+    navAssessment: 'Assessment',
+    navLeave: 'Leave & Absence',
+    navUsers: 'User Management',
+    navAdmin: 'ADMIN',
+    lastUpdated: 'Last Updated',
+    btnLogout: 'Logout',
+    // Topbar
+    btnRefresh: 'Refresh',
+    searchPlaceholder: 'Search name / ID...',
+    // Section titles (main/sub)
+    secTitleDashboard: 'Dashboard',
+    secSubDashboard: 'Overview',
+    secTitleStaff: 'Staff',
+    secSubStaff: 'All of Staff Operation',
+    secTitleAssessment: 'Assessment',
+    secSubAssessment: 'CS Tracker',
+    secTitleLeave: 'Leave & Absence',
+    secSubLeave: 'All of Staff Operation',
+    secTitleTrainee: 'Trainee',
+    secSubTrainee: 'Trainee Staff',
+    secTitleUsers: 'User Management',
+    secSubUsers: 'System Users',
+    // Dashboard KPI
+    kpiTotalStaff: 'Total Staff',
+    kpiInTracker: 'In CS Tracker',
+    kpiT1Pass: 'T1 Pass',
+    kpi3rdAttempt: '3rd Attempt',
+    kpiT1Fail3sub: 'T1+T2 Fail',
+    kpiTotalSWD: 'Total SWD',
+    kpiSWDsub: 'Sick w/ certificate',
+    kpiTotalWOP: 'Total WOP',
+    kpiWOPsub: 'Absent',
+    kpiVacUsed: 'Vacation Used',
+    kpiVacSub: 'days',
+    kpiAvgDays: 'Avg. Working Days',
+    // Charts
+    chartStaffByPos: 'Staff by Position <span>— All of Staff</span>',
+    chartTestResult: 'Test Results <span>— CS Tracker</span>',
+    chartLeaveByType: 'Leave by Type <span>— Total</span>',
+    chartWorkingDays: 'Working Days (Top 8) <span>— All of Staff</span>',
+    chartT1Pass: 'T1 Pass',
+    chartT1Fail: 'T1 Fail',
+    chartNotTested: 'Not Tested',
+    // Staff section
+    staffListTitle: 'Staff List',
+    btnAddStaff: 'Add Staff',
+    thNo: 'No.',
+    thName: 'Name',
+    thPosition: 'Position',
+    thStartDate: 'Start Date',
+    thEndDate: 'End Date',
+    thWorkingDays: 'Working Days',
+    thStatus: 'Status',
+    // Trainee section
+    traineeListTitle: 'Trainee',
+    btnAddTrainee: 'Add Trainee',
+    // Assessment section
+    calTitle: '📅 Exam Schedule',
+    assessCardTitle: 'Staff Assessment',
+    assessKpiInTracker: 'In CS Tracker',
+    assessKpiInTrackerSub: 'All listed',
+    assessKpiT1Pass: 'T1 Pass',
+    assessKpiPassBoth: 'Pass T1+T2',
+    assessKpiPassBothSub: 'Both rounds',
+    assessKpiLatestFail: 'Latest Fail',
+    assessKpiLatestFailSub: 'Must retake',
+    assessKpiWaiting: 'Waiting',
+    assessKpiWaitingSub: 'No exam date',
+    // Filter chips
+    filterAll: 'All',
+    filterWaiting: '⏳ Waiting',
+    filterUpcoming: '📌 Upcoming',
+    filterPass1: '✓ T1 Pass',
+    filterPass12: '✓ T1+T2 Pass',
+    filterFail: '✗ Fail',
+    // Status badges (assessment)
+    badgePass12: '✓✓ Pass T1+T2',
+    badgePass1: '✓ Pass T1',
+    badgeUpcoming: '📌 Upcoming',
+    badgeFail: '✗ Fail',
+    badgePending: '● Pending',
+    badgeWaiting: '⏳ Waiting',
+    // Assessment card labels
+    assessMilestone: '📅 Milestone',
+    assessTestResults: '📝 Test Results',
+    assessLeave: '📋 Leave',
+    assessBtnAssess: '📋 Assess',
+    assessBtnEditAssess: '✎ Edit Assessment',
+    assessBtnAssessed: '✓ Assessed',
+    testRound1: 'Round 1',
+    testRound2: 'Round 2',
+    testRound3: 'Round 3',
+    testWaiting: 'Waiting',
+    testNA: 'N/A',
+    msDayNotYet: 'Not yet',
+    // Leave section
+    leaveCardTitle: 'Leave & Absence Data',
+    labelPosition: 'Position:',
+    labelType: 'Type:',
+    leaveKpiTotal: 'Total Leave Days',
+    leaveKpiTotalSub: 'All types',
+    leaveKpiSWD: 'SWD — Sick w/ Doc',
+    leaveKpiWOP: 'WOP — Absent',
+    leaveKpiVac: 'V — Vacation Used',
+    leaveKpiVacSub: 'Vacation days',
+    posFilterAll: 'All',
+    btnDetails: '🔍 Details',
+    btnEdit: '✎ Edit',
+    // Pagination
+    showingOf: 'Showing {start}–{end} of {total}',
+    // Empty state
+    emptyState: 'No data found',
+    // Error
+    errorLoad: '⚠️ Failed to load: ',
+    errorLoadSub: 'Check that Google Sheets is shared as "Anyone with the link"',
+    // Loading
+    loadingMain: 'Loading data...',
+    loadingStaff: 'Loading All of Staff...',
+    loadingTracker: 'Loading CS Tracker...',
+    loadingTrainee: 'Loading Trainee Staff...',
+    // Modal
+    modalCancel: 'Cancel',
+    modalSave: 'Save',
+    modalClose: 'Close',
+    // Leave detail modal
+    leaveDetailTitle: 'Leave Details',
+    leaveDetailSheetsBtn: 'Open in Google Sheets',
+    leaveDetailNoItems: 'No records',
+    leaveDetailTotal: 'total leave',
+    leaveDetailTotalLabel: 'Total Leave',
+    // Trainee detail
+    traineeDetailNoComment: 'No comment',
+    traineeDetailLeaveTotal: 'Leave & Absence — Total',
+    // Calendar
+    calNoExams: 'No exams this month',
+    // Add modal
+    addStaffTitle: '＋ Add New Staff',
+    addTraineeTitle: '＋ Add New Trainee',
+    addStaffNote: '📋 Data will be saved to Google Sheets sheet <b>All of Staff</b>',
+    addTraineeNote: '📋 Data will be saved to Google Sheets sheet <b>Trainee Staff</b>',
+    // Form labels
+    formName: 'Full Name *',
+    formId5: 'Employee ID * (5 digits)',
+    formIdT: 'ID * (4-5 digits)',
+    formPosition: 'Position *',
+    formStartDate: 'Start Date * (DD/MM/YYYY)',
+    formEndDate: 'End Date (DD/MM/YYYY)',
+    formStatus: 'Status',
+    formComment: 'Comment',
+    formSelectPos: '— Select Position —',
+    // Save
+    savingData: 'Saving...',
+    saveSuccess: '✅ Saved successfully! Refresh to see new data.',
+    saveFail: '❌ Save failed: ',
+    saveSuccessMsg: '✅ Saved successfully!',
+    // Assessment form
+    assessFormTitle: '📋 Daily Report Assessment',
+    assessFormSave: 'Save Assessment',
+    assessFormSaving: '⏳ Saving...',
+    assessFormSaved: '✓ Saved',
+    assessFormPDFGen: '📄 Generating PDF...',
+    assessFormUploading: '☁️ Uploading to Google Drive...',
+    assessFormSuccess: '✅ Saved! Score {score}/60 — {result} | PDF saved to Drive',
+    assessFormSaveFail: '❌ Save failed: ',
+    assessPassLabel: '✓ Pass',
+    assessFailLabel: '✗ Fail',
+    // Cal day popup
+    calPopupTitle: '📅 Exam {d}/{m}/{y}',
+    calPopupAssessBtn: '📋 Assess',
+    // User management
+    userMgmt: 'User Management',
+    addUser: 'Add User',
+    editUser: 'Edit User',
+    thDisplayName: 'Display Name',
+    thUsername: 'Username',
+    thRole: 'Role',
+    thActions: 'Actions',
+    formDisplayName: 'Display Name',
+    formUsername: 'Username *',
+    formPassword: 'Password *',
+    formPasswordOpt: 'Password (leave blank to keep)',
+    formRole: 'Role',
+    userSaveOk: 'User saved successfully',
+    userDeleteOk: 'User deleted',
+    userSaveFail: 'Save failed: ',
+    userDeleteFail: 'Delete failed: ',
+    confirmDelete: 'Confirm?',
+  },
+  th: {
+    // Nav
+    navMain: 'เมนูหลัก',
+    navDashboard: 'Dashboard',
+    navStaff: 'พนักงาน',
+    navTrainee: 'นักศึกษาฝึกงาน',
+    navData: 'ข้อมูล',
+    navAssessment: 'การประเมินผล',
+    navLeave: 'การลา & ขาดงาน',
+    navUsers: 'จัดการผู้ใช้งาน',
+    navAdmin: 'ผู้ดูแลระบบ',
+    lastUpdated: 'อัปเดตล่าสุด',
+    btnLogout: 'ออกจากระบบ',
+    // Topbar
+    btnRefresh: 'รีเฟรช',
+    searchPlaceholder: 'ค้นหาชื่อ / รหัส...',
+    // Section titles
+    secTitleDashboard: 'Dashboard',
+    secSubDashboard: 'ภาพรวมทั้งหมด',
+    secTitleStaff: 'พนักงาน',
+    secSubStaff: 'All of Staff Operation',
+    secTitleAssessment: 'การประเมินผล',
+    secSubAssessment: 'CS Tracker',
+    secTitleLeave: 'การลา & ขาดงาน',
+    secSubLeave: 'All of Staff Operation',
+    secTitleTrainee: 'นักศึกษาฝึกงาน',
+    secSubTrainee: 'Trainee Staff',
+    secTitleUsers: 'จัดการผู้ใช้งาน',
+    secSubUsers: 'ผู้ใช้งานระบบ',
+    // Dashboard KPI
+    kpiTotalStaff: 'พนักงานทั้งหมด',
+    kpiInTracker: 'ใน CS Tracker',
+    kpiT1Pass: 'ผ่านทดสอบ T1',
+    kpi3rdAttempt: 'เข้าสอบครั้งที่ 3',
+    kpiT1Fail3sub: 'T1+T2 ไม่ผ่าน',
+    kpiTotalSWD: 'SWD รวม',
+    kpiSWDsub: 'ป่วยมีใบแพทย์',
+    kpiTotalWOP: 'WOP รวม',
+    kpiWOPsub: 'ขาดงาน',
+    kpiVacUsed: 'พักร้อนที่ใช้',
+    kpiVacSub: 'วัน',
+    kpiAvgDays: 'Working Days เฉลี่ย',
+    // Charts
+    chartStaffByPos: 'พนักงานตามตำแหน่ง <span>— All of Staff</span>',
+    chartTestResult: 'ผลทดสอบ <span>— CS Tracker</span>',
+    chartLeaveByType: 'การลาตามประเภท <span>— รวมทั้งหมด</span>',
+    chartWorkingDays: 'Working Days (Top 8) <span>— All of Staff</span>',
+    chartT1Pass: 'T1 ผ่าน',
+    chartT1Fail: 'T1 ไม่ผ่าน',
+    chartNotTested: 'ยังไม่ทดสอบ',
+    // Staff
+    staffListTitle: 'รายชื่อพนักงาน',
+    btnAddStaff: 'เพิ่มพนักงาน',
+    thNo: 'ลำดับ',
+    thName: 'ชื่อ-สกุล',
+    thPosition: 'ตำแหน่ง',
+    thStartDate: 'วันที่เริ่มงาน',
+    thEndDate: 'วันที่สิ้นสุด',
+    thWorkingDays: 'วันทำงาน',
+    thStatus: 'สถานะ',
+    // Trainee
+    traineeListTitle: 'นักศึกษาฝึกงาน',
+    btnAddTrainee: 'เพิ่มนักศึกษา',
+    // Assessment
+    calTitle: '📅 ตารางนัดสอบ',
+    assessCardTitle: 'การประเมินผลพนักงาน',
+    assessKpiInTracker: 'พนักงานใน CS Tracker',
+    assessKpiInTrackerSub: 'รายชื่อทั้งหมด',
+    assessKpiT1Pass: 'ผ่านทดสอบ T1',
+    assessKpiPassBoth: 'ผ่าน T1+T2',
+    assessKpiPassBothSub: 'ผ่านทั้ง 2 รอบ',
+    assessKpiLatestFail: 'รอบล่าสุดไม่ผ่าน',
+    assessKpiLatestFailSub: 'ต้องสอบใหม่',
+    assessKpiWaiting: 'รอกำหนดการ',
+    assessKpiWaitingSub: 'ยังไม่มีวันสอบ',
+    // Filter
+    filterAll: 'ทั้งหมด',
+    filterWaiting: '⏳ รอกำหนดการ',
+    filterUpcoming: '📌 รอสอบ',
+    filterPass1: '✓ ผ่าน T1',
+    filterPass12: '✓ ผ่าน T1+T2',
+    filterFail: '✗ ไม่ผ่าน',
+    // Status badges
+    badgePass12: '✓✓ ผ่าน T1+T2',
+    badgePass1: '✓ ผ่าน T1',
+    badgeUpcoming: '📌 รอสอบ',
+    badgeFail: '✗ ไม่ผ่าน',
+    badgePending: '● รอผล',
+    badgeWaiting: '⏳ รอกำหนดการ',
+    // Assessment card
+    assessMilestone: '📅 Milestone',
+    assessTestResults: '📝 ผลการทดสอบ',
+    assessLeave: '📋 การลา',
+    assessBtnAssess: '📋 ประเมิน',
+    assessBtnEditAssess: '✎ แก้ไขการประเมิน',
+    assessBtnAssessed: '✓ ประเมินเรียบร้อยแล้ว',
+    testRound1: 'ครั้งที่ 1',
+    testRound2: 'ครั้งที่ 2',
+    testRound3: 'ครั้งที่ 3',
+    testWaiting: 'รอกำหนดการ',
+    testNA: 'ไม่จำเป็น',
+    msDayNotYet: 'ยังไม่ถึง',
+    // Leave
+    leaveCardTitle: 'ข้อมูลการลา & ขาดงาน',
+    labelPosition: 'ตำแหน่ง:',
+    labelType: 'ประเภท:',
+    leaveKpiTotal: 'วันลา/ขาดรวมทั้งหมด',
+    leaveKpiTotalSub: 'รวมทุกประเภท',
+    leaveKpiSWD: 'SWD — ป่วยมีใบแพทย์',
+    leaveKpiWOP: 'WOP — ขาดงาน',
+    leaveKpiVac: 'V — พักร้อนที่ใช้',
+    leaveKpiVacSub: 'วันหยุดพักร้อน',
+    posFilterAll: 'ทั้งหมด',
+    btnDetails: '🔍 รายละเอียด',
+    btnEdit: '✎ แก้ไข',
+    // Pagination
+    showingOf: 'แสดง {start}–{end} จาก {total}',
+    // Empty state
+    emptyState: 'ไม่พบข้อมูล',
+    // Error
+    errorLoad: '⚠️ โหลดข้อมูลไม่สำเร็จ: ',
+    errorLoadSub: 'ตรวจสอบว่า Google Sheets Share เป็น "Anyone with the link" แล้วหรือยัง',
+    // Loading
+    loadingMain: 'กำลังโหลดข้อมูล...',
+    loadingStaff: 'กำลังโหลด All of Staff...',
+    loadingTracker: 'กำลังโหลด CS Tracker...',
+    loadingTrainee: 'กำลังโหลด Trainee Staff...',
+    // Modal
+    modalCancel: 'ยกเลิก',
+    modalSave: 'บันทึก',
+    modalClose: 'ปิด',
+    // Leave detail modal
+    leaveDetailTitle: 'รายละเอียดการลา',
+    leaveDetailSheetsBtn: 'เปิดใน Google Sheets',
+    leaveDetailNoItems: 'ไม่มีรายการ',
+    leaveDetailTotal: 'รวมลา',
+    leaveDetailTotalLabel: 'วันลา/ขาด',
+    // Trainee detail
+    traineeDetailNoComment: 'ไม่มีหมายเหตุ',
+    traineeDetailLeaveTotal: 'การลา & ขาดงาน — รวม',
+    // Calendar
+    calNoExams: 'ไม่มีนัดสอบในเดือนนี้',
+    // Add modal
+    addStaffTitle: '＋ เพิ่มพนักงานใหม่',
+    addTraineeTitle: '＋ เพิ่มนักศึกษาฝึกงานใหม่',
+    addStaffNote: '📋 ข้อมูลจะถูกบันทึกลง Google Sheets ชีท <b>All of Staff</b>',
+    addTraineeNote: '📋 ข้อมูลจะถูกบันทึกลง Google Sheets ชีท <b>Trainee Staff</b>',
+    // Form labels
+    formName: 'ชื่อ-สกุล *',
+    formId5: 'รหัสพนักงาน * (5 หลัก)',
+    formIdT: 'รหัส * (4-5 หลัก)',
+    formPosition: 'ตำแหน่ง *',
+    formStartDate: 'วันที่เริ่มงาน * (DD/MM/YYYY)',
+    formEndDate: 'วันที่สิ้นสุด (DD/MM/YYYY)',
+    formStatus: 'สถานะ',
+    formComment: 'Comment (คอลัมน์ E)',
+    formSelectPos: '— เลือกตำแหน่ง —',
+    // Save
+    savingData: 'กำลังส่งข้อมูล...',
+    saveSuccess: '✅ บันทึกสำเร็จ! รีเฟรชเพื่อดูข้อมูลใหม่',
+    saveFail: '❌ บันทึกไม่สำเร็จ: ',
+    saveSuccessMsg: '✅ บันทึกสำเร็จแล้ว!',
+    // Assessment form
+    assessFormTitle: '📋 แบบประเมินการสอบปิดยอด',
+    assessFormSave: 'บันทึกผลการประเมิน',
+    assessFormSaving: '⏳ กำลังบันทึก...',
+    assessFormSaved: '✓ บันทึกแล้ว',
+    assessFormPDFGen: '📄 กำลังสร้าง PDF...',
+    assessFormUploading: '☁️ กำลังอัพโหลดขึ้น Google Drive...',
+    assessFormSuccess: '✅ บันทึกสำเร็จ! คะแนน {score}/60 — {result} | PDF บันทึกลง Drive แล้ว',
+    assessFormSaveFail: '❌ บันทึกไม่สำเร็จ: ',
+    assessPassLabel: '✓ ผ่าน',
+    assessFailLabel: '✗ ไม่ผ่าน',
+    // Cal day popup
+    calPopupTitle: '📅 นัดสอบ {d}/{m}/{y}',
+    calPopupAssessBtn: '📋 ประเมิน',
+    // User management
+    userMgmt: 'จัดการผู้ใช้งาน',
+    addUser: 'เพิ่มผู้ใช้งาน',
+    editUser: 'แก้ไขผู้ใช้งาน',
+    thDisplayName: 'ชื่อที่แสดง',
+    thUsername: 'ชื่อผู้ใช้',
+    thRole: 'สิทธิ์',
+    thActions: 'การดำเนินการ',
+    formDisplayName: 'ชื่อที่แสดง',
+    formUsername: 'ชื่อผู้ใช้ *',
+    formPassword: 'รหัสผ่าน *',
+    formPasswordOpt: 'รหัสผ่าน (เว้นว่างเพื่อคงเดิม)',
+    formRole: 'สิทธิ์',
+    userSaveOk: 'บันทึกผู้ใช้งานสำเร็จ',
+    userDeleteOk: 'ลบผู้ใช้งานแล้ว',
+    userSaveFail: 'บันทึกไม่สำเร็จ: ',
+    userDeleteFail: 'ลบไม่สำเร็จ: ',
+    confirmDelete: 'ยืนยัน?',
+  }
+};
+
+function tr(key) { return LANG[currentLang][key] || LANG['en'][key] || key; }
+
+function applyStaticI18n() {
+  // data-i18n: set textContent
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = tr(key);
+  });
+  // data-i18n-html: set innerHTML
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    el.innerHTML = tr(key);
+  });
+  // Search input placeholder
+  const gs = document.getElementById('globalSearch');
+  if (gs) gs.placeholder = tr('searchPlaceholder');
+  const as = document.getElementById('assessIdSearch');
+  if (as) as.placeholder = currentLang === 'th' ? 'ค้นหารหัส / ชื่อ...' : 'Search ID / Name...';
+  // Modal static buttons
+  const mc = document.getElementById('modalCancelBtn');
+  if (mc) mc.textContent = tr('modalCancel');
+  const afc = document.getElementById('assessFormCancelBtn');
+  if (afc) afc.textContent = tr('modalCancel');
+  const ldc = document.getElementById('leaveDetailCloseBtn');
+  if (ldc) ldc.textContent = tr('modalClose');
+  const lds = document.getElementById('leaveDetailSheetsBtn');
+  if (lds) lds.textContent = tr('leaveDetailSheetsBtn');
+  // Leave detail modal title (only if not currently open with specific name)
+  const ldt = document.getElementById('leaveDetailTitle');
+  if (ldt && !ldt.textContent.includes('—')) ldt.textContent = tr('leaveDetailTitle');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  // Update toggle button
+  const lbl = document.getElementById('langToggleLabel');
+  if (lbl) lbl.innerHTML = lang === 'en' ? '<b>EN</b> | TH' : 'EN | <b>TH</b>';
+  // Update topbar title for current active section
+  const activeNav = document.querySelector('.nav-item.active');
+  if (activeNav) {
+    const onclick = activeNav.getAttribute('onclick') || '';
+    const m = onclick.match(/showSection\('(\w+)'/);
+    if (m) {
+      const id = m[1];
+      const titleKey = 'secTitle' + id.charAt(0).toUpperCase() + id.slice(1);
+      const subKey   = 'secSub'   + id.charAt(0).toUpperCase() + id.slice(1);
+      document.getElementById('topbarTitle').innerHTML = `${tr(titleKey)} <span>${tr(subKey)}</span>`;
+    }
+  }
+  applyStaticI18n();
+  destroyCharts();
+  buildAll();
+}
+
+function toggleLang() {
+  setLang(currentLang === 'en' ? 'th' : 'en');
+}
+
+let staffData=[],trackerData=[],traineeData=[];
+let filteredStaff=[],filteredLeave=[],filteredAssess=[],filteredTrainee=[];
+let staffPage=1,leavePage=1,traineePage=1;
+const PER_PAGE=12;
+let staffSort={key:'no',dir:1};
+let charts={};
+let assessFilter='',leavePosFilter='',leaveTypeFilter='',staffPosFilter='',traineePosFilter='';
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+
+// ── CSV PARSER ──
+function parseCSV(text){
+  const rows=[];let row=[],cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i],nx=text[i+1];
+    if(ch==='"'){if(inQ&&nx==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){
+      if(ch==='\r'&&nx==='\n')i++;
+      row.push(cur.trim());cur='';
+      if(row.some(c=>c!==''))rows.push(row);row=[];
+    }else cur+=ch;
+  }
+  if(cur!==''||row.length){row.push(cur.trim());if(row.some(c=>c!==''))rows.push(row);}
+  return rows;
+}
+
+// ── FETCH WITH TIMEOUT ──
+async function fetchCSV(gid){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),20000);
+  try{
+    // ดึงผ่าน proxy server แทน (แก้ปัญหา CORS / redirect บน browser)
+    const r=await fetch(`/api/sheet?gid=${gid}`,{cache:'no-store',signal:controller.signal});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    return parseCSV(await r.text());
+  }catch(e){
+    if(e.name==='AbortError')throw new Error('หมดเวลา 20 วินาที — ตรวจสอบว่า server.js รันอยู่');
+    throw e;
+  }finally{clearTimeout(timer);}
+}
+
+// ── PARSE STAFF ──
+function readLeaveRange(row,start,end){const d=[];for(let i=start;i<=end;i++){const v=(row[i]||'').trim();if(v)d.push(v);}return d;}
+
+function parseStaffCSV(rows){
+  const result=[];
+  const isEmp=r=>/^\d{5}$/.test((r[2]||'').trim());
+  const isTest=r=>!(r[2]||'').trim()&&((r[10]||'').trim().toUpperCase()==='TRUE'||/\d+\/\d+/.test((r[11]||'').trim()));
+  let i=0;
+  while(i<rows.length&&!isEmp(rows[i]))i++;
+  while(i<rows.length){
+    const row=rows[i];
+    if(!isEmp(row)){i++;continue;}
+    const name=(row[1]||'').trim(),id=(row[2]||'').trim(),pos=(row[3]||'').trim();
+    const start=(row[5]||'').trim(),status=(row[6]||'Active').trim(),days=parseInt(row[7])||0;
+    const swdDates=readLeaveRange(row,20,53),swoDates=readLeaveRange(row,55,64),slDates=readLeaveRange(row,66,75);
+    const wopDates=readLeaveRange(row,77,86),wipDates=readLeaveRange(row,88,97),lDates=readLeaveRange(row,99,108);
+    const vDates=readLeaveRange(row,110,129);
+    const swd=swdDates.length,swo=swoDates.length,sl=slDates.length;
+    const wop=wopDates.length,wip=wipDates.length,l=lDates.length,v=vDates.length;
+    const vLeft=parseInt(row[130])||0;
+    const tests=[];
+    if((row[10]||'').trim().toUpperCase()==='TRUE'){const td=(row[11]||'').trim();if(td)tests.push(td);}
+    i++;
+    while(i<rows.length&&isTest(rows[i])){const td=(rows[i][11]||'').trim();if(td)tests.push(td);i++;}
+    const mkT=idx=>tests[idx]?{date:tests[idx],r:'DONE'}:{date:'—',r:'—'};
+    result.push({no:(row[0]||'').trim(),name,id,pos,start,status,days,t1:mkT(0),t2:mkT(1),t3:mkT(2),
+      swd,swo,sl,wop,wip,l,v,vLeft,swdDates,swoDates,slDates,wopDates,wipDates,lDates,vDates});
+  }
+  return result;
+}
+
+// ── PARSE TRACKER ──
+function parseTrackerCSV(rows){
+  const result=[];
+  const isEmp=r=>/^\d{5}$/.test((r[2]||'').trim());
+  const isMs=r=>!(r[2]||'').trim()&&/^\d+$/.test((r[6]||'').trim())&&parseInt(r[6])>0;
+  const getResult=(passCol,failCol,row)=>{
+    if((row[passCol]||'').trim().toUpperCase()==='TRUE')return'PASS';
+    if((row[failCol]||'').trim().toUpperCase()==='TRUE')return'FAIL';
+    const d=(row[passCol-1]||'').trim();
+    if(d&&d!=='N/A')return'DONE';return'—';
+  };
+  let i=0;
+  while(i<rows.length&&!isEmp(rows[i]))i++;
+  while(i<rows.length){
+    const row=rows[i];
+    if(!isEmp(row)){i++;continue;}
+    const name=(row[1]||'').trim(),id=(row[2]||'').trim(),pos=(row[3]||'').trim();
+    const start=(row[4]||'').trim(),days=parseInt(row[5])||0;
+    const milestones=[];
+    const msDay=parseInt(row[6])||0;
+    if(msDay)milestones.push({day:msDay,flag:(row[7]||'').trim().toUpperCase()==='TRUE',date:(row[8]||'').trim(),comment:(row[9]||'').trim()});
+    const t1={date:(row[10]||'').trim(),r:getResult(11,12,row),comment:(row[13]||'').trim()};
+    const t2={date:(row[14]||'').trim(),r:getResult(15,16,row),comment:(row[17]||'').trim()};
+    const t3={date:(row[18]||'').trim(),r:getResult(19,20,row),comment:(row[21]||'').trim()};
+    const swd=parseInt(row[22])||0,swo=parseInt(row[23])||0,sl=parseInt(row[24])||0;
+    const wop=parseInt(row[25])||0,wip=parseInt(row[26])||0,l=parseInt(row[27])||0,v=parseInt(row[28])||0;
+    i++;
+    while(i<rows.length&&isMs(rows[i])){
+      const sub=rows[i];
+      milestones.push({day:parseInt(sub[6])||0,flag:(sub[7]||'').trim().toUpperCase()==='TRUE',date:(sub[8]||'').trim(),comment:(sub[9]||'').trim()});
+      i++;
+    }
+    result.push({no:(row[0]||'').trim(),name,id,pos,start,days,t1,t2,t3,milestones,swd,swo,sl,wop,wip,l,v});
+  }
+  return result;
+}
+
+// ── PARSE TRAINEE ──
+function parseTraineeCSV(rows){
+  const result=[];
+  const isEmp=r=>/^\d{4,5}$/.test((r[2]||'').trim());
+  const isMs=r=>!(r[2]||'').trim()&&/^(60|90|119)$/.test((r[10]||'').trim());
+  const getR=(passCol,failCol,row)=>{
+    if((row[passCol]||'').trim().toUpperCase()==='TRUE')return'PASS';
+    if((row[failCol]||'').trim().toUpperCase()==='TRUE')return'FAIL';
+    const d=(row[passCol-1]||'').trim();if(d&&d!=='N/A')return'DONE';return'—';
+  };
+  let i=0;
+  while(i<rows.length&&!isEmp(rows[i]))i++;
+  while(i<rows.length){
+    const row=rows[i];
+    if(!isEmp(row)){i++;continue;}
+    const no=(row[0]||'').trim(),name=(row[1]||'').trim(),id=(row[2]||'').trim();
+    const pos=(row[3]||'').trim(),comment=(row[4]||'').trim();
+    const start=(row[5]||'').trim(),end=(row[6]||'').trim();
+    const status=(row[7]||'Active').trim(),days=parseInt(row[8])||0;
+    const t1={date:(row[14]||'').trim(),r:getR(15,16,row)};
+    const t2={date:(row[17]||'').trim(),r:getR(18,19,row)};
+    const rd=(s,e)=>{const ds=[];for(let j=s;j<=e;j++){const v=(row[j]||'').trim();if(v)ds.push(v);}return ds;};
+    const swdDates=rd(21,54),swoDates=rd(56,65),slDates=rd(67,76);
+    const wopDates=rd(78,87),wipDates=rd(89,98),lDates=rd(100,109),vDates=rd(111,130);
+    const vLeft=parseInt(row[131])||0;
+    const milestones=[];
+    const msDay=parseInt(row[10])||0;
+    if(msDay)milestones.push({day:msDay,flag:(row[11]||'').trim().toUpperCase()==='TRUE',date:(row[12]||'').trim(),comment:(row[13]||'').trim()});
+    i++;
+    while(i<rows.length&&isMs(rows[i])){
+      const sub=rows[i];
+      milestones.push({day:parseInt(sub[10])||0,flag:(sub[11]||'').trim().toUpperCase()==='TRUE',date:(sub[12]||'').trim(),comment:(sub[13]||'').trim()});
+      i++;
+    }
+    result.push({no,name,id,pos,comment,start,end,status,days,t1,t2,milestones,
+      swd:swdDates.length,swo:swoDates.length,sl:slDates.length,
+      wop:wopDates.length,wip:wipDates.length,l:lDates.length,v:vDates.length,vLeft,
+      swdDates,swoDates,slDates,wopDates,wipDates,lDates,vDates});
+  }
+  return result;
+}
+
+// ── LOAD ALL ──
+async function loadAll(){
+  document.getElementById('refreshBtn').classList.add('spinning');
+  try{
+    document.getElementById('loadingText').textContent=tr('loadingStaff');
+    const sRows=await fetchCSV(GID_STAFF);
+    document.getElementById('loadingText').textContent=tr('loadingTracker');
+    const tRows=await fetchCSV(GID_TRACKER);
+    document.getElementById('loadingText').textContent=tr('loadingTrainee');
+    const trRows=await fetchCSV(GID_TRAINEE);
+    staffData=parseStaffCSV(sRows);
+    trackerData=parseTrackerCSV(tRows);
+    traineeData=parseTraineeCSV(trRows);
+    filteredStaff=[...staffData];filteredLeave=[...staffData];
+    filteredAssess=[...trackerData];filteredTrainee=[...traineeData];
+    document.getElementById('errorBanner').classList.remove('show');
+    document.getElementById('refreshTime').textContent=new Date().toLocaleTimeString(currentLang==='th'?'th-TH':'en-US');
+    document.getElementById('badge-staff').textContent=staffData.length;
+    document.getElementById('badge-assess').textContent=trackerData.length;
+    document.getElementById('badge-leave').textContent=staffData.length;
+    document.getElementById('badge-trainee').textContent=traineeData.length;
+    return true;
+  }catch(e){
+    const b=document.getElementById('errorBanner');
+    b.innerHTML=`${tr('errorLoad')}<b>${e.message}</b><br><small style="opacity:.8">${tr('errorLoadSub')}</small>`;
+    b.classList.add('show');
+    return false;
+  }finally{
+    document.getElementById('refreshBtn').classList.remove('spinning');
+  }
+}
+
+async function refreshAll(){const ok=await loadAll();if(ok){destroyCharts();buildAll();}}
+function destroyCharts(){Object.values(charts).forEach(c=>c.destroy());charts={};}
+
+// ── NAV ──
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const titleKey = 'secTitle' + id.charAt(0).toUpperCase() + id.slice(1);
+  const subKey   = 'secSub'   + id.charAt(0).toUpperCase() + id.slice(1);
+  document.getElementById('topbarTitle').innerHTML=`${tr(titleKey)} <span>${tr(subKey)}</span>`;
+  if(id==='users')loadUsers();
+}
+
+// ── HELPERS ──
+const POS_COLORS={'GSC Supervisor':'#6d28d9','Duty Manager':'#d97706','Supervisor':'#0d9488','Sr. CSA':'#2563eb','CSA':'#6b7280'};
+const POS_BG={'GSC Supervisor':'#ede9fe','Duty Manager':'#fef3c7','Supervisor':'#ccfbf1','Sr. CSA':'#dbeafe','CSA':'#f3f4f6'};
+function posBadge(p){const c=POS_COLORS[p]||'#6b7280',bg=POS_BG[p]||'#f3f4f6';return`<span class="pos-badge" style="background:${bg};color:${c}">${p||'—'}</span>`;}
+function statusBadge(s){
+  const v=(s||'').toLowerCase();
+  if(v==='active')    return`<span class="badge badge-green">● Active</span>`;
+  if(v==='probation') return`<span class="badge badge-amber">● Probation</span>`;
+  if(v==='resigned')  return`<span class="badge badge-red">● Resigned</span>`;
+  return`<span class="badge badge-gray">${s||'—'}</span>`;
+}
+
+// ── DASHBOARD ──
+function buildDashboard(){
+  const total=staffData.length,maxDays=Math.max(...staffData.map(s=>s.days),1);
+  const avgDays=total?Math.round(staffData.reduce((a,s)=>a+s.days,0)/total):0;
+  const t1Pass=trackerData.filter(t=>t.t1.r==='PASS').length;
+  const t1Fail=trackerData.filter(t=>t.t1.r==='FAIL').length;
+  const t3Count=trackerData.filter(t=>t.t3.date&&t.t3.date!=='—'&&t.t3.date!=='N/A').length;
+  const totalSWD=staffData.reduce((a,s)=>a+s.swd,0);
+  const totalWOP=staffData.reduce((a,s)=>a+s.wop,0);
+  const totalVac=staffData.reduce((a,s)=>a+s.v,0);
+  document.getElementById('kpiGrid').innerHTML=[
+    {icon:'👥',label:tr('kpiTotalStaff'),val:total,sub:'All of Staff',color:'var(--gold)',bg:'var(--gold-light)',pct:100},
+    {icon:'📝',label:tr('kpiInTracker'),val:trackerData.length,sub:'CS Tracker',color:'var(--teal)',bg:'var(--teal-light)',pct:Math.round(trackerData.length/total*100)||0},
+    {icon:'✓',label:tr('kpiT1Pass'),val:t1Pass,sub:`${trackerData.length?Math.round(t1Pass/trackerData.length*100):0}% pass rate`,color:'var(--green)',bg:'var(--green-light)',pct:trackerData.length?Math.round(t1Pass/trackerData.length*100):0},
+    {icon:'⚠',label:tr('kpi3rdAttempt'),val:t3Count,sub:tr('kpiT1Fail3sub'),color:'var(--amber)',bg:'var(--amber-light)',pct:trackerData.length?Math.round(t3Count/trackerData.length*100):0},
+    {icon:'🏥',label:tr('kpiTotalSWD'),val:totalSWD,sub:tr('kpiSWDsub'),color:'#6d28d9',bg:'#ede9fe',pct:55},
+    {icon:'🚫',label:tr('kpiTotalWOP'),val:totalWOP,sub:tr('kpiWOPsub'),color:'var(--red)',bg:'var(--red-light)',pct:45},
+    {icon:'🌴',label:tr('kpiVacUsed'),val:totalVac,sub:tr('kpiVacSub'),color:'#db2777',bg:'#fce7f3',pct:50},
+    {icon:'📅',label:tr('kpiAvgDays'),val:avgDays,sub:currentLang==='th'?`สูงสุด ${maxDays} วัน`:`Max ${maxDays} days`,color:'var(--blue)',bg:'var(--blue-light)',pct:Math.round(avgDays/maxDays*100)||0},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-icon" style="background:${k.bg};color:${k.color}">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.val}</div><div class="kpi-sub">${k.sub}</div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${k.pct}%;background:${k.color}"></div></div></div>`).join('');
+  buildCharts(t1Pass,t1Fail);
+}
+
+const cOpts={color:'rgba(0,0,0,.08)'},cTick={color:'#9ca3af',font:{family:'Sarabun',size:11}};
+function buildCharts(t1Pass,t1Fail){
+  const positions=[...new Set(staffData.map(s=>s.pos).filter(Boolean))];
+  charts.pos=new Chart(document.getElementById('posChart'),{type:'bar',data:{labels:positions,datasets:[{data:positions.map(p=>staffData.filter(s=>s.pos===p).length),backgroundColor:positions.map(p=>POS_BG[p]||'#f3f4f6'),borderColor:positions.map(p=>POS_COLORS[p]||'#6b7280'),borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:cOpts,ticks:cTick},y:{grid:cOpts,ticks:{...cTick,stepSize:1},beginAtZero:true}}}});
+  charts.test=new Chart(document.getElementById('testChart'),{type:'doughnut',data:{labels:[tr('chartT1Pass'),tr('chartT1Fail'),tr('chartNotTested')],datasets:[{data:[t1Pass,t1Fail,trackerData.length-t1Pass-t1Fail],backgroundColor:['#dcfce7','#fee2e2','#f3f4f6'],borderColor:['#16a34a','#dc2626','#d1d5db'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{labels:{color:'#6b7280',font:{family:'Sarabun',size:11},boxWidth:10,padding:12}}}}});
+  const lTotals=[staffData.reduce((a,s)=>a+s.swd,0),staffData.reduce((a,s)=>a+s.swo,0),staffData.reduce((a,s)=>a+s.sl,0),staffData.reduce((a,s)=>a+s.wop,0),staffData.reduce((a,s)=>a+s.wip,0),staffData.reduce((a,s)=>a+s.l,0),staffData.reduce((a,s)=>a+s.v,0)];
+  charts.leave=new Chart(document.getElementById('leaveChart'),{type:'bar',data:{labels:['SWD','SWO','S/L','WOP','WIP','L','V'],datasets:[{data:lTotals,backgroundColor:['#ede9fe','#dbeafe','#fef3c7','#fee2e2','#dbeafe','#d1fae5','#fce7f3'],borderColor:['#6d28d9','#2563eb','#d97706','#dc2626','#1d4ed8','#065f46','#9d174d'],borderWidth:2,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:cOpts,ticks:cTick},y:{grid:cOpts,ticks:cTick,beginAtZero:true}}}});
+  const top8=[...staffData].sort((a,b)=>b.days-a.days).slice(0,8);
+  charts.days=new Chart(document.getElementById('daysChart'),{type:'bar',data:{labels:top8.map(s=>s.name.split(' ')[0]),datasets:[{data:top8.map(s=>s.days),backgroundColor:'rgba(176,122,0,.15)',borderColor:'var(--gold)',borderWidth:2,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:cOpts,ticks:cTick},y:{grid:{display:false},ticks:cTick}}}});
+}
+
+// ── STAFF ──
+function buildStaff(){
+  const positions=['',...new Set(staffData.map(s=>s.pos).filter(Boolean))];
+  const labels={'':tr('posFilterAll'),'GSC Supervisor':'GSC Sup','Duty Manager':'DM','Supervisor':'Sup','Sr. CSA':'Sr.CSA','CSA':'CSA'};
+  document.getElementById('posFilters').innerHTML=positions.map((p,i)=>`<button class="filter-chip ${i===0?'active':''}" onclick="filterStaffPos(this,'${p}')">${labels[p]||p}</button>`).join('');
+  renderStaff();
+}
+function filterStaffPos(btn,pos){document.querySelectorAll('#posFilters .filter-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');staffPosFilter=pos;applyStaffFilter();}
+function applyStaffFilter(){
+  const q=document.getElementById('globalSearch').value.trim().toLowerCase();
+  filteredStaff=staffData.filter(s=>(!staffPosFilter||s.pos===staffPosFilter)&&(!q||s.name.toLowerCase().includes(q)||s.id.includes(q)));
+  filteredStaff.sort((a,b)=>{
+    let av,bv;
+    if(staffSort.key==='no'){av=parseInt(a.no)||0;bv=parseInt(b.no)||0;}
+    else if(staffSort.key==='days'){av=a.days;bv=b.days;}
+    else if(staffSort.key==='name'){av=a.name;bv=b.name;}
+    else{av=0;bv=0;}
+    return typeof av==='string'?av.localeCompare(bv)*staffSort.dir:(av-bv)*staffSort.dir;
+  });
+  staffPage=1;renderStaff();
+}
+function sortStaff(key){if(staffSort.key===key)staffSort.dir*=-1;else staffSort={key,dir:1};applyStaffFilter();}
+function renderStaff(){
+  const start=(staffPage-1)*PER_PAGE,slice=filteredStaff.slice(start,start+PER_PAGE);
+  const maxDays=Math.max(...staffData.map(s=>s.days),1);
+  document.getElementById('staffCountLabel').textContent=`(${filteredStaff.length} ${currentLang==='th'?'คน':'staff'})`;
+  document.getElementById('staffBody').innerHTML=slice.length?slice.map(s=>`<tr>
+    <td style="color:var(--gray400);font-size:12px">${s.no}</td>
+    <td><div class="td-name">${s.name}</div><div class="td-sub">${s.id}</div></td>
+    <td>${posBadge(s.pos)}</td>
+    <td style="font-size:12px;color:var(--gray500)">${s.start}</td>
+    <td><div class="days-mini"><span style="font-weight:600;font-size:13px;min-width:36px">${s.days}</span><div class="days-track"><div class="days-fill" style="width:${Math.round(s.days/maxDays*100)}%"></div></div></div></td>
+    <td>${statusBadge(s.status)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openEditModal('staff','${s.id}')">${tr('btnEdit')}</button></td>
+  </tr>`).join(''):`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🔍</div>${tr('emptyState')}</div></td></tr>`;
+  document.getElementById('staffPageInfo').textContent=slice.length?tr('showingOf').replace('{start}',start+1).replace('{end}',Math.min(start+PER_PAGE,filteredStaff.length)).replace('{total}',filteredStaff.length):'';
+  renderPageBtns('staffPageBtns',Math.ceil(filteredStaff.length/PER_PAGE),staffPage,p=>{staffPage=p;renderStaff();});
+}
+
+// ── ASSESSMENT ──
+function parseTestDate(str){
+  if(!str||str==='—'||str==='N/A'||str==='')return null;
+  const m=str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if(!m)return null;
+  let[,d,mo,y]=m;if(y.length===2)y='25'+y;
+  let yr=parseInt(y);if(yr>2400)yr-=543;
+  return new Date(yr,parseInt(mo)-1,parseInt(d));
+}
+function formatDateKey(date){return`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;}
+
+function buildCalendar(year,month){
+  calYear=year;calMonth=month;
+  const MONTHS_TH=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS_TH=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const DAYS_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = currentLang==='th' ? MONTHS_TH : MONTHS_EN;
+  const DAYS   = currentLang==='th' ? DAYS_TH : DAYS_EN;
+  const yearDisplay = currentLang==='th' ? year+543 : year;
+  document.getElementById('calMonthLabel').textContent=`${MONTHS[month]} ${yearDisplay}`;
+  const events={};
+  trackerData.forEach(t=>{[['T1',t.t1.date],['T2',t.t2.date],['T3',t.t3.date]].forEach(([lbl,ds])=>{const dt=parseTestDate(ds);if(!dt)return;const key=formatDateKey(dt);if(!events[key])events[key]=[];events[key].push({name:t.name,label:lbl});});});
+  const first=new Date(year,month,1),startDow=first.getDay(),daysInMonth=new Date(year,month+1,0).getDate();
+  const today=new Date();today.setHours(0,0,0,0);const todayKey=formatDateKey(today);
+  let html=DAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+  for(let i=0;i<startDow;i++)html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${year}-${month+1}-${d}`,ev=events[key]||[];
+    const isToday=key===todayKey,isPast=new Date(year,month,d)<today;
+    let testCls=ev.length?(isToday?'has-test':isPast?'has-test-past':'has-test'):'';
+    const cls=['cal-day',isToday?'today':'',testCls].filter(Boolean).join(' ');
+    const tip=ev.map(e=>`${e.name} (${e.label})`).join('\n');
+    html+=`<div class="${cls}" title="${tip}" ${ev.length?`onclick="calDayClick('${key}')"`:''}><span>${d}</span>${ev.length?`<span class="cal-count">${ev.length>1?ev.length:'●'}</span>`:''}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+  const allThisMonth=Object.entries(events).filter(([k])=>{const[y2,m2]=k.split('-');return parseInt(y2)===year&&parseInt(m2)-1===month;}).sort(([a],[b])=>a.localeCompare(b));
+  document.getElementById('calLegend').innerHTML=allThisMonth.length?allThisMonth.map(([k,evs])=>{const[,m2,d2]=k.split('-');const dt=new Date(year,month,parseInt(d2));dt.setHours(0,0,0,0);const isT=k===todayKey,isP=dt<today;const bg=isT?'#fef08a':isP?'var(--gray100)':'var(--teal-light)';const col=isT?'#92400e':isP?'var(--gray400)':'var(--teal)';return`<span style="background:${bg};color:${col};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${d2}/${m2} — ${evs.map(e=>`${e.name.split(' ')[0]} (${e.label})`).join(', ')}</span>`;}).join(''):`<span style="color:var(--gray300);font-size:12px">${tr('calNoExams')}</span>`;
+}
+function calPrev(){const d=new Date(calYear,calMonth-1,1);buildCalendar(d.getFullYear(),d.getMonth());}
+function calNext(){const d=new Date(calYear,calMonth+1,1);buildCalendar(d.getFullYear(),d.getMonth());}
+function calDayClick(key){
+  const events={};
+  trackerData.forEach(t=>{[['T1',t.t1.date],['T2',t.t2.date],['T3',t.t3.date]].forEach(([lbl,ds])=>{const dt=parseTestDate(ds);if(!dt)return;const k=formatDateKey(dt);if(!events[k])events[k]=[];events[k].push({name:t.name,id:t.id,pos:t.pos,label:lbl});});});
+  const[y,m,d]=key.split('-'),evs=events[key]||[];if(!evs.length)return;
+  const calY=currentLang==='th'?parseInt(y)+543:y;
+  document.getElementById('modalTitle').textContent=tr('calPopupTitle').replace('{d}',d).replace('{m}',m).replace('{y}',calY);
+  document.getElementById('modalBody').innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">${evs.map(e=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--teal-light);border-radius:10px"><div style="width:36px;height:36px;border-radius:9px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${e.name.charAt(0)}</div><div style="flex:1"><div style="font-weight:700">${e.name}</div><div style="font-size:12px;color:var(--gray500)">${e.id} · ${e.pos} · <b style="color:var(--teal)">${e.label}</b></div></div><button class="btn btn-gold btn-sm" onclick="closeEditModal();openAssessForm('${e.id}')">${tr('calPopupAssessBtn')}</button></div>`).join('')}</div>`;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function latestTestFail(t){
+  if(t.t3.date&&t.t3.date!=='—'&&t.t3.date!=='N/A')return t.t3.r==='FAIL';
+  if(t.t2.date&&t.t2.date!=='—'&&t.t2.date!=='N/A')return t.t2.r==='FAIL';
+  if(t.t1.date&&t.t1.date!=='—'&&t.t1.date!=='N/A')return t.t1.r==='FAIL';
+  return false;
+}
+function isWaiting(t){
+  const noDate=d=>!d||d==='—'||d==='N/A';
+  if(noDate(t.t1.date))return true;
+  if(t.t1.r==='FAIL'&&noDate(t.t2.date))return true;
+  if(t.t2.r==='FAIL'&&noDate(t.t3.date))return true;
+  return false;
+}
+function hasUpcomingTest(t){
+  const today=new Date();today.setHours(0,0,0,0);
+  for(const d of[t.t1.date,t.t2.date,t.t3.date]){const dt=parseTestDate(d);if(dt&&dt>=today)return true;}
+  return false;
+}
+
+function buildAssessment(){
+  const t1Pass=trackerData.filter(t=>t.t1.r==='PASS').length;
+  const t2Pass=trackerData.filter(t=>t.t2.r==='PASS').length;
+  const failLatest=trackerData.filter(t=>latestTestFail(t)).length;
+  const waiting=trackerData.filter(t=>(!t.t1.date||t.t1.date==='—')&&(!t.t2.date||t.t2.date==='—')).length;
+  document.getElementById('assessKpiGrid').innerHTML=[
+    {icon:'👥',label:tr('assessKpiInTracker'),val:trackerData.length,sub:tr('assessKpiInTrackerSub'),color:'var(--gold)',bg:'var(--gold-light)',pct:100},
+    {icon:'✓',label:tr('assessKpiT1Pass'),val:t1Pass,sub:`${trackerData.length?Math.round(t1Pass/trackerData.length*100):0}%`,color:'var(--green)',bg:'var(--green-light)',pct:trackerData.length?Math.round(t1Pass/trackerData.length*100):0},
+    {icon:'✓✓',label:tr('assessKpiPassBoth'),val:t2Pass,sub:tr('assessKpiPassBothSub'),color:'var(--teal)',bg:'var(--teal-light)',pct:trackerData.length?Math.round(t2Pass/trackerData.length*100):0},
+    {icon:'✗',label:tr('assessKpiLatestFail'),val:failLatest,sub:tr('assessKpiLatestFailSub'),color:'var(--red)',bg:'var(--red-light)',pct:trackerData.length?Math.round(failLatest/trackerData.length*100):0},
+    {icon:'⏳',label:tr('assessKpiWaiting'),val:waiting,sub:tr('assessKpiWaitingSub'),color:'var(--amber)',bg:'var(--amber-light)',pct:trackerData.length?Math.round(waiting/trackerData.length*100):0},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-icon" style="background:${k.bg};color:${k.color}">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.val}</div><div class="kpi-sub">${k.sub}</div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${k.pct}%;background:${k.color}"></div></div></div>`).join('');
+  buildCalendar(calYear,calMonth);
+  renderAssessment();
+}
+
+function filterAssess(btn,f){document.querySelectorAll('#assessFilterRow .filter-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');assessFilter=f;applyAssessFilter();}
+function applyAssessFilter(){
+  const q=((document.getElementById('assessIdSearch')||{value:''}).value||document.getElementById('globalSearch').value).trim().toLowerCase();
+  filteredAssess=trackerData.filter(t=>{
+    if(q&&!t.name.toLowerCase().includes(q)&&!t.id.includes(q))return false;
+    if(assessFilter==='waiting')return isWaiting(t)&&!hasUpcomingTest(t);
+    if(assessFilter==='upcoming')return hasUpcomingTest(t);
+    if(assessFilter==='pass1')return t.t1.r==='PASS';
+    if(assessFilter==='pass12')return t.t1.r==='PASS'&&t.t2.r==='PASS';
+    if(assessFilter==='fail')return latestTestFail(t);
+    return true;
+  });
+  renderAssessment();
+}
+
+function renderAssessment(){
+  document.getElementById('assessCountLabel').textContent=`(${filteredAssess.length} ${currentLang==='th'?'คน':'staff'})`;
+  if(!filteredAssess.length){document.getElementById('assessGrid').innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div>${tr('emptyState')}</div>`;return;}
+  const MS_LABELS={60:currentLang==='th'?'60 วัน':'60 Days',90:currentLang==='th'?'90 วัน':'90 Days',119:currentLang==='th'?'119 วัน':'119 Days'};
+  function overallStatus(t){
+    if(t.t1.r==='PASS'&&t.t2.r==='PASS')return'pass12';
+    if(t.t1.r==='PASS')return'pass1';
+    if(latestTestFail(t))return hasUpcomingTest(t)?'upcoming':'fail';
+    if(hasUpcomingTest(t))return'upcoming';
+    if(t.t1.date&&t.t1.date!=='—')return'tested';
+    return'waiting';
+  }
+  document.getElementById('assessGrid').innerHTML=filteredAssess.map(t=>{
+    const status=overallStatus(t);
+    const t3show=(t.t1.r==='FAIL'&&t.t2.r==='FAIL')||(t.t3.date&&t.t3.date!=='—'&&t.t3.date!=='N/A');
+    const statusBadgeHtml=status==='pass12'?`<span class="badge badge-green">${tr('badgePass12')}</span>`:status==='pass1'?`<span class="badge badge-green">${tr('badgePass1')}</span>`:status==='upcoming'?`<span class="badge badge-blue">${tr('badgeUpcoming')}</span>`:status==='fail'?`<span class="badge badge-red">${tr('badgeFail')}</span>`:status==='tested'?`<span class="badge badge-blue">${tr('badgePending')}</span>`:`<span class="badge badge-gray">${tr('badgeWaiting')}</span>`;
+    return`<div class="assess-card">
+      <div class="assess-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:15px">${t.name.charAt(0)}</div>
+          <div><div class="assess-name">${t.name}</div><div style="font-size:11px;color:var(--gray400);margin-top:2px">${t.id} · ${posBadge(t.pos)} · ${currentLang==='th'?'เริ่ม':'Start'} ${t.start} · ${t.days} ${currentLang==='th'?'วัน':'days'}</div></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${statusBadgeHtml}<button class="btn btn-outline btn-sm" onclick="openEditModal('tracker','${t.id}')">${tr('btnEdit')}</button>${(()=>{
+          const nextRound = (t.t1.r!=='PASS'&&t.t1.r!=='FAIL') ? 'T1' : (t.t2.r!=='PASS'&&t.t2.r!=='FAIL') ? 'T2' : 'T3';
+          const roundData = nextRound==='T1'?t.t1:nextRound==='T2'?t.t2:t.t3;
+          const isDone = roundData.r==='PASS'||roundData.r==='FAIL';
+          return isDone
+            ? `<span style="font-size:11px;color:var(--gray400);background:var(--gray100);padding:4px 10px;border-radius:20px;font-weight:500">${tr('assessBtnAssessed')}</span><button class="btn btn-outline btn-sm" onclick="openAssessForm('${t.id}')">${tr('assessBtnEditAssess')}</button>`
+            : `<button class="btn btn-gold btn-sm" onclick="openAssessForm('${t.id}')">${tr('assessBtnAssess')}</button>`;
+        })()}</div>
+      </div>
+      <div class="assess-body">
+        <div>
+          <div class="assess-section-title">${tr('assessMilestone')}</div>
+          <div class="milestone-list">${[60,90,119].map(day=>{const ms=t.milestones.find(m=>m.day===day);if(!ms)return`<div class="milestone-item"><div class="ms-dot ms-dot-none"></div><div><div class="ms-day">${MS_LABELS[day]}</div><div class="ms-date" style="color:var(--gray300)">${tr('msDayNotYet')}</div></div></div>`;return`<div class="milestone-item"><div class="ms-dot ${ms.flag&&ms.date?'ms-dot-done':ms.flag?'ms-dot-pend':'ms-dot-none'}"></div><div><div class="ms-day">${MS_LABELS[day]}</div>${ms.date&&ms.date!=='N/A'?`<div class="ms-date">${ms.date}</div>`:''} ${ms.comment?`<div class="ms-comment">${ms.comment}</div>`:''}</div></div>`;}).join('')}</div>
+        </div>
+        <div>
+          <div class="assess-section-title">${tr('assessTestResults')}</div>
+          <div class="test-block">
+            <div class="test-row-item"><div class="tr-label">${tr('testRound1')} ${t.t1.r==='PASS'?'<span class="badge badge-green" style="font-size:9px">PASS</span>':t.t1.r==='FAIL'?'<span class="badge badge-red" style="font-size:9px">FAIL</span>':''}</div><div class="tr-date">${t.t1.date&&t.t1.date!=='—'?t.t1.date:`<span style="color:var(--amber)">${tr('testWaiting')}</span>`}</div>${t.t1.comment?`<div class="tr-comment">${t.t1.comment}</div>`:''}</div>
+            <div class="test-row-item"><div class="tr-label">${tr('testRound2')} ${t.t2.r==='PASS'?'<span class="badge badge-green" style="font-size:9px">PASS</span>':t.t2.r==='FAIL'?'<span class="badge badge-red" style="font-size:9px">FAIL</span>':''}</div><div class="tr-date">${t.t2.date&&t.t2.date!=='—'?t.t2.date:t.t1.r==='PASS'?`<span style="color:var(--gray300)">${tr('testNA')}</span>`:`<span style="color:var(--amber)">${tr('testWaiting')}</span>`}</div>${t.t2.comment?`<div class="tr-comment">${t.t2.comment}</div>`:''}</div>
+            ${t3show?`<div class="test-row-item" style="border:1px solid #fde68a;background:#fefce8"><div class="tr-label">${tr('testRound3')} ${t.t3.r==='PASS'?'<span class="badge badge-green" style="font-size:9px">PASS</span>':t.t3.r==='FAIL'?'<span class="badge badge-red" style="font-size:9px">FAIL</span>':''}</div><div class="tr-date">${t.t3.date&&t.t3.date!=='—'?t.t3.date:`<span style="color:var(--amber)">${tr('testWaiting')}</span>`}</div>${t.t3.comment?`<div class="tr-comment">${t.t3.comment}</div>`:''}</div>`:''}
+          </div>
+        </div>
+        <div>
+          <div class="assess-section-title">${tr('assessLeave')}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${[['SWD',t.swd,'#ede9fe','#6d28d9'],['SWO',t.swo,'#dbeafe','#2563eb'],['S/L',t.sl,'#fef3c7','#d97706'],['WOP',t.wop,'#fee2e2','#dc2626'],['WIP',t.wip,'#dbeafe','#1d4ed8'],['L',t.l,'#d1fae5','#065f46'],['V',t.v,'#fce7f3','#9d174d']].map(([lb,v,bg,c])=>`<div style="background:${bg};border-radius:6px;padding:6px 8px;text-align:center"><div style="font-size:10px;color:${c};font-weight:700">${lb}</div><div style="font-size:16px;font-weight:700;color:${c}">${v||'—'}</div></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LEAVE ──
+const LEAVE_TYPES=[
+  {key:'swdDates',label:'SWD — Sick Leave with Doctor Certificate',bg:'#ede9fe',color:'#6d28d9'},
+  {key:'swoDates',label:'SWO — Sick Leave without Doctor Certificate',bg:'#dbeafe',color:'#1d4ed8'},
+  {key:'slDates',label:'S/L — Sick Leave',bg:'#fef3c7',color:'#d97706'},
+  {key:'wopDates',label:'WOP — Leave Without Pay',bg:'#fee2e2',color:'#dc2626'},
+  {key:'wipDates',label:'WIP — Leave With Pay',bg:'#e0f2fe',color:'#0369a1'},
+  {key:'lDates',label:'L — Personal Leave',bg:'#d1fae5',color:'#065f46'},
+  {key:'vDates',label:'V — Vacation Leave',bg:'#fce7f3',color:'#9d174d'},
+];
+function buildLeave(){
+  const tot=s=>s.swd+s.swo+s.sl+s.wop+s.wip+s.l+s.v;
+  const totalAll=staffData.reduce((a,s)=>a+tot(s),0);
+  const totSWD=staffData.reduce((a,s)=>a+s.swd,0),totSWO=staffData.reduce((a,s)=>a+s.swo,0);
+  const totSL=staffData.reduce((a,s)=>a+s.sl,0),totWOP=staffData.reduce((a,s)=>a+s.wop,0);
+  const totWIP=staffData.reduce((a,s)=>a+s.wip,0),totL=staffData.reduce((a,s)=>a+s.l,0),totV=staffData.reduce((a,s)=>a+s.v,0);
+  const personalLeaveLabel = currentLang==='th'?`WIP ${totWIP} · ลากิจ ${totL}`:`WIP ${totWIP} · Personal ${totL}`;
+  document.getElementById('leaveKpiGrid').innerHTML=[
+    {icon:'📋',label:tr('leaveKpiTotal'),val:totalAll,sub:`${staffData.length} ${currentLang==='th'?'คน':'staff'} · ${tr('leaveKpiTotalSub')}`,color:'#6d28d9',bg:'#ede9fe',pct:100},
+    {icon:'🏥',label:tr('leaveKpiSWD'),val:totSWD,sub:`SWO ${totSWO} · S/L ${totSL}`,color:'#d97706',bg:'#fef3c7',pct:Math.round(totSWD/Math.max(totalAll,1)*100)},
+    {icon:'🚫',label:tr('leaveKpiWOP'),val:totWOP,sub:personalLeaveLabel,color:'var(--red)',bg:'var(--red-light)',pct:Math.round(totWOP/Math.max(totalAll,1)*100)},
+    {icon:'🌴',label:tr('leaveKpiVac'),val:totV,sub:tr('leaveKpiVacSub'),color:'#db2777',bg:'#fce7f3',pct:Math.round(totV/Math.max(totalAll,1)*100)},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-icon" style="background:${k.bg};color:${k.color}">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.val}</div><div class="kpi-sub">${k.sub}</div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${k.pct}%;background:${k.color}"></div></div></div>`).join('');
+  const positions=['',...new Set(staffData.map(s=>s.pos).filter(Boolean))];
+  const posLabels={'':tr('posFilterAll'),'GSC Supervisor':'GSC Sup','Duty Manager':'DM','Supervisor':'Sup','Sr. CSA':'Sr.CSA','CSA':'CSA'};
+  document.getElementById('leavePosFilters').innerHTML=positions.map((p,i)=>`<button class="filter-chip ${i===0?'active':''}" onclick="filterLeavePos(this,'${p}')">${posLabels[p]||p}</button>`).join('');
+  filteredLeave=[...staffData];renderLeave();
+}
+function filterLeavePos(btn,pos){document.querySelectorAll('#leavePosFilters .filter-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');leavePosFilter=pos;applyLeaveFilter();}
+function filterLeaveType(btn,type){document.querySelectorAll('#leaveTypeFilters .filter-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');leaveTypeFilter=type;applyLeaveFilter();}
+function applyLeaveFilter(){
+  const q=document.getElementById('globalSearch').value.trim().toLowerCase();
+  filteredLeave=staffData.filter(s=>{
+    if(q&&!s.name.toLowerCase().includes(q)&&!s.id.includes(q))return false;
+    if(leavePosFilter&&s.pos!==leavePosFilter)return false;
+    if(leaveTypeFilter==='swd')return s.swd>0;if(leaveTypeFilter==='swo')return s.swo>0;
+    if(leaveTypeFilter==='sl')return s.sl>0;if(leaveTypeFilter==='wop')return s.wop>0;
+    if(leaveTypeFilter==='wip')return s.wip>0;if(leaveTypeFilter==='l')return s.l>0;
+    if(leaveTypeFilter==='v')return s.v>0;return true;
+  }).sort((a,b)=>(b.swd+b.swo+b.sl+b.wop+b.wip+b.l+b.v)-(a.swd+a.swo+a.sl+a.wop+a.wip+a.l+a.v));
+  leavePage=1;renderLeave();
+}
+function numCell(val,color){return val?`<b style="color:${color}">${val}</b>`:`<span style="color:var(--gray300)">—</span>`;}
+function renderLeave(){
+  const start=(leavePage-1)*PER_PAGE,slice=filteredLeave.slice(start,start+PER_PAGE);
+  document.getElementById('leaveCountLabel').textContent=`(${filteredLeave.length} ${currentLang==='th'?'คน':'staff'})`;
+  document.getElementById('leaveBody').innerHTML=slice.length?slice.map(s=>`<tr>
+    <td><div class="td-name">${s.name}</div><div class="td-sub">${s.id}</div></td>
+    <td>${posBadge(s.pos)}</td>
+    <td>${numCell(s.swd,'#6d28d9')}</td><td>${numCell(s.swo,'#2563eb')}</td><td>${numCell(s.sl,'#d97706')}</td>
+    <td>${numCell(s.wop,'var(--red)')}</td><td>${numCell(s.wip,'#1d4ed8')}</td><td>${numCell(s.l,'#065f46')}</td><td>${numCell(s.v,'#db2777')}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openLeaveDetail('${s.id}')">${tr('btnDetails')}</button></td>
+  </tr>`).join(''):`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔍</div>${tr('emptyState')}</div></td></tr>`;
+  document.getElementById('leavePageInfo').textContent=slice.length?tr('showingOf').replace('{start}',start+1).replace('{end}',Math.min(start+PER_PAGE,filteredLeave.length)).replace('{total}',filteredLeave.length):'';
+  renderPageBtns('leavePageBtns',Math.ceil(filteredLeave.length/PER_PAGE),leavePage,p=>{leavePage=p;renderLeave();});
+}
+function openLeaveDetail(id){
+  const s=staffData.find(x=>x.id===id);if(!s)return;
+  document.getElementById('leaveDetailTitle').textContent=`📅 ${tr('leaveDetailTitle')} — ${s.name}`;
+  const total=s.swd+s.swo+s.sl+s.wop+s.wip+s.l+s.v;
+  const totalLabel=currentLang==='th'?`รวมลา <b style="color:var(--gold)">${total} วัน</b>`:`${tr('leaveDetailTotal')} <b style="color:var(--gold)">${total} days</b>`;
+  let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--gray50);border-radius:10px;border:1px solid var(--gray200)"><div style="width:42px;height:42px;border-radius:10px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:17px">${s.name.charAt(0)}</div><div><div style="font-weight:700;font-size:15px">${s.name}</div><div style="font-size:12px;color:var(--gray400);margin-top:2px">${s.id} · ${posBadge(s.pos)} · ${totalLabel}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">`;
+  LEAVE_TYPES.forEach(lt=>{const dates=s[lt.key]||[];html+=`<div style="border:1px solid ${lt.bg};border-radius:10px;overflow:hidden"><div style="background:${lt.bg};padding:8px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:700;color:${lt.color}">${lt.label}</span><span style="font-size:18px;font-weight:800;color:${lt.color}">${dates.length}</span></div><div style="padding:10px 14px;min-height:44px;background:var(--white)">${dates.length?dates.map(d=>`<span style="display:inline-block;font-size:11px;background:${lt.bg};color:${lt.color};padding:2px 8px;border-radius:4px;margin:2px;font-weight:600">${d}</span>`).join(''):`<span style="font-size:12px;color:var(--gray300)">${tr('leaveDetailNoItems')}</span>`}</div></div>`;});
+  html+='</div>';
+  document.getElementById('leaveDetailBody').innerHTML=html;
+  document.getElementById('leaveDetailModal').classList.add('open');
+}
+
+// ── TRAINEE ──
+function buildTrainee(){filteredTrainee=[...traineeData];renderTrainee();}
+function filterTraineePos(btn,pos){document.querySelectorAll('#traineePosFilters .filter-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');traineePosFilter=pos;applyTraineeFilter();}
+function applyTraineeFilter(){
+  const q=document.getElementById('globalSearch').value.trim().toLowerCase();
+  filteredTrainee=traineeData.filter(t=>(!q||t.name.toLowerCase().includes(q)||t.id.includes(q))&&(!traineePosFilter||t.pos===traineePosFilter));
+  traineePage=1;renderTrainee();
+}
+function renderTrainee(){
+  const start=(traineePage-1)*PER_PAGE,slice=filteredTrainee.slice(start,start+PER_PAGE);
+  const maxDays=Math.max(...traineeData.map(t=>t.days),1);
+  document.getElementById('traineeCountLabel').textContent=`(${filteredTrainee.length} ${currentLang==='th'?'คน':'trainees'})`;
+  const existing=document.getElementById('traineePosFilters');
+  if(!existing.children.length){
+    const positions=['',...new Set(traineeData.map(t=>t.pos).filter(Boolean))];
+    existing.innerHTML=positions.map((p,i)=>`<button class="filter-chip ${i===0?'active':''}" onclick="filterTraineePos(this,'${p}')">${p||tr('posFilterAll')}</button>`).join('');
+  }
+  document.getElementById('traineeBody').innerHTML=slice.length?slice.map(t=>`<tr>
+    <td style="color:var(--gray400);font-size:12px">${t.no}</td>
+    <td><div class="td-name">${t.name}</div><div class="td-sub">${t.id}</div></td>
+    <td>${posBadge(t.pos)}</td>
+    <td style="font-size:12px;color:var(--gray500)">${t.start}</td>
+    <td style="font-size:12px;color:var(--gray500)">${t.end||'<span style="color:var(--gray300)">—</span>'}</td>
+    <td><div class="days-mini"><span style="font-weight:600;font-size:13px;min-width:36px">${t.days}</span><div class="days-track"><div class="days-fill" style="width:${Math.round(t.days/maxDays*100)}%"></div></div></div></td>
+    <td>${statusBadge(t.status)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openTraineeDetail('${t.id}')">${tr('btnDetails')}</button></td>
+  </tr>`).join(''):`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔍</div>${tr('emptyState')}</div></td></tr>`;
+  document.getElementById('traineePageInfo').textContent=slice.length?tr('showingOf').replace('{start}',start+1).replace('{end}',Math.min(start+PER_PAGE,filteredTrainee.length)).replace('{total}',filteredTrainee.length):'';
+  renderPageBtns('traineePageBtns',Math.ceil(filteredTrainee.length/PER_PAGE),traineePage,p=>{traineePage=p;renderTrainee();});
+}
+function openTraineeDetail(id){
+  const t=traineeData.find(x=>x.id===id);if(!t)return;
+  const MS_LABELS_T={60:currentLang==='th'?'60 วัน':'60 Days',90:currentLang==='th'?'90 วัน':'90 Days',119:currentLang==='th'?'119 วัน':'119 Days'};
+  const totalLeave=t.swd+t.swo+t.sl+t.wop+t.wip+t.l+t.v;
+  const startLabel=currentLang==='th'?'เริ่ม':'Start';
+  const daysLabel=currentLang==='th'?'วัน':'days';
+  const leaveTotalLine=currentLang==='th'?`การลา & ขาดงาน — รวม ${totalLeave} วัน`:`${tr('traineeDetailLeaveTotal')} ${totalLeave} days`;
+  document.getElementById('modalTitle').textContent=`🎓 ${t.name}`;
+  document.getElementById('modalBody').innerHTML=`
+    <div style="background:var(--gray50);border-radius:10px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--gray200)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:16px">${t.name.charAt(0)}</div>
+        <div><div style="font-weight:700;font-size:15px">${t.name}</div><div style="font-size:12px;color:var(--gray400)">${t.id} · ${t.pos} · ${startLabel} ${t.start}${t.end?' — '+t.end:''} · ${t.days} ${daysLabel}</div></div>
+        ${statusBadge(t.status)}
+      </div>
+      ${t.comment?`<div style="font-size:12px;color:var(--gray600);background:var(--white);padding:8px 12px;border-radius:8px;border:1px solid var(--gray200)">💬 ${t.comment}</div>`:''}
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="border:1px solid var(--gray200);border-radius:10px;overflow:hidden">
+        <div style="background:var(--gray50);padding:8px 14px;font-size:11px;font-weight:700;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">💬 Comment</div>
+        <div style="padding:12px 14px;min-height:44px;background:var(--white)">
+          ${t.comment?`<div style="font-size:13px;color:var(--gray700);line-height:1.6">${t.comment}</div>`:`<span style="font-size:12px;color:var(--gray300)">${tr('traineeDetailNoComment')}</span>`}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${leaveTotalLine}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${LEAVE_TYPES.map(lt=>{const dates=t[lt.key]||[];return`<div style="border:1px solid ${lt.bg};border-radius:10px;overflow:hidden"><div style="background:${lt.bg};padding:6px 12px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:${lt.color}">${lt.label}</span><span style="font-size:16px;font-weight:800;color:${lt.color}">${dates.length}</span></div><div style="padding:8px 12px;background:var(--white);min-height:36px">${dates.length?dates.map(d=>`<span style="display:inline-block;font-size:11px;background:${lt.bg};color:${lt.color};padding:2px 7px;border-radius:4px;margin:2px;font-weight:600">${d}</span>`).join(''):`<span style="font-size:12px;color:var(--gray300)">${tr('leaveDetailNoItems')}</span>`}</div></div>`;}).join('')}</div>`;
+  document.getElementById('editModal').classList.add('open');
+}
+
+// ── DATE HELPER ──
+function getTodayTH(){
+  const d = new Date();
+  const day   = d.getDate();
+  const month = d.getMonth() + 1;
+  const year  = d.getFullYear() + 543;
+  return `${day}/${month}/${year}`;
+}
+
+// ── ASSESSMENT FORM ──
+const ASSESS_SECTIONS = [
+  { no:1, title:'Revenue & Report Accuracy', type:'score', items:[
+    '1.1 Able to verify total sales completely (SETTLEMENT)',
+    '1.2 Verify cash / debit card / privilege payments',
+    '1.3 Each item balance matches the system',
+  ]},
+  { no:2, title:'Document Completeness', type:'score', items:[
+    '2.1 Verify accuracy of GUEST REGISTRATION',
+    '2.2 Other documents e.g. Airline VOUCHER, Thailand Elite, Booking',
+    '2.3 File documents in correct order, complete set, with photo saved to Idrive',
+  ]},
+  { no:3, title:'End-of-Day Closing Process Knowledge', type:'score', items:[
+    '3.1 Able to explain steps for balance verification',
+    '3.2 Able to troubleshoot and locate discrepancies when balance does not match',
+  ]},
+  { no:4, title:'Attention to Detail', type:'score', items:[
+    '4.1 Double-check before submission / send email to correct recipient',
+    '4.2 No missing data or documents of any kind',
+    '4.3 Understanding of total calculation (SUM)',
+  ]},
+  { no:5, title:'Time Management', type:'score', items:[
+    '5.1 Able to complete closing within the required timeframe (23:00 – 01:00)',
+  ]},
+  { no:6, title:'Additional Summary Tasks', type:'check', items:[
+    '6.1 Summarize bathroom and private room service usage',
+    '6.2 Submit summary via LINE GROUP',
+    '6.3 Hand over key issues to next shift',
+  ]},
+  { no:7, title:'Comments', type:'comment' },
+];
+
+let currentAssessId = '', currentAssessRound = '';
+
+function openAssessForm(id) {
+  const t = trackerData.find(x => x.id === id);
+  if (!t) return;
+  currentAssessId = id;
+
+  // หารอบที่ต้องประเมินถัดไป — ดูจากผล (PASS/FAIL) ไม่ใช่วันที่
+  if (t.t1.r !== 'PASS' && t.t1.r !== 'FAIL') currentAssessRound = 'T1';
+  else if (t.t2.r !== 'PASS' && t.t2.r !== 'FAIL') currentAssessRound = 'T2';
+  else currentAssessRound = 'T3';
+
+  // ดึงวันที่สอบจาก Sheets (เหมือนที่แสดงในปฏิทิน)
+  const scheduledDate =
+    currentAssessRound === 'T1' ? (t.t1.date && t.t1.date !== '—' ? t.t1.date : '') :
+    currentAssessRound === 'T2' ? (t.t2.date && t.t2.date !== '—' ? t.t2.date : '') :
+    (t.t3.date && t.t3.date !== '—' ? t.t3.date : '');
+
+  document.getElementById('assessFormTitle').textContent = `📋 ${currentLang==='th'?'ประเมิน':'Assess'} ${t.name} — ${currentLang==='th'?'รอบ':'Round'} ${currentAssessRound}`;
+
+  // Dropdown ผู้ประเมิน: เฉพาะ Supervisor, Duty Manager, GSC Supervisor
+  const evaluatorPositions = ['Supervisor','Duty Manager','GSC Supervisor'];
+  const evaluators = staffData.filter(s => evaluatorPositions.includes(s.pos) && s.status === 'Active');
+  const evalOptions = evaluators.map(s => `<option value="${s.name} (${s.pos})">${s.name} — ${s.pos}</option>`).join('');
+
+  // สร้าง form
+  let html = `
+    <!-- Header Info -->
+    <div style="background:var(--gold-light);border-radius:10px;padding:12px 16px;margin-bottom:16px;border:1px solid #f0d89a">
+      <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px">${currentLang==='th'?'แบบประเมินการสอบเขียนและปฏิบัติในการปิดยอด — Daily Report':'Written & Practical Assessment Form — Daily Report'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div><div style="font-size:10px;color:var(--gray400);font-weight:600;text-transform:uppercase">${currentLang==='th'?'ผู้สอบ':'Examinee'}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray900)">${t.name}</div>
+          <div style="font-size:11px;color:var(--gray400)">${t.id} · ${t.pos}</div>
+        </div>
+        <div><div style="font-size:10px;color:var(--gray400);font-weight:600;text-transform:uppercase">${currentLang==='th'?'รอบที่สอบ':'Round'}</div>
+          <span class="badge badge-blue" style="margin-top:4px;display:inline-flex">${currentAssessRound}</span>
+        </div>
+        <div><div style="font-size:10px;color:var(--gray400);font-weight:600;text-transform:uppercase;margin-bottom:4px">${currentLang==='th'?'วันที่สอบ':'Exam Date'}</div>
+          <input id="af_date" class="form-input" style="font-size:12px;background:var(--gray50);color:var(--gray500)" readonly value="${scheduledDate}"/>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--gray50);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:11px;color:var(--gray500);line-height:1.6">
+      ${currentLang==='th'
+        ? '<b style="color:var(--gray700)">เกณฑ์คะแนน:</b> &nbsp; 5 = ดีมาก &nbsp;|&nbsp; 4 = ดี &nbsp;|&nbsp; 3 = พอใช้ &nbsp;|&nbsp; 2 = ปรับปรุง &nbsp;|&nbsp; 1 = ปฏิบัติไม่ได้ &nbsp;&nbsp;<b style="color:var(--green)">≥ 50 คะแนน = ผ่าน</b> &nbsp;|&nbsp; <b style="color:var(--red)">&lt; 50 คะแนน = ไม่ผ่าน</b>'
+        : '<b style="color:var(--gray700)">Criteria:</b> &nbsp; 5 = Excellent &nbsp;|&nbsp; 4 = Good &nbsp;|&nbsp; 3 = Fair &nbsp;|&nbsp; 2 = Needs Improvement &nbsp;|&nbsp; 1 = Cannot Perform &nbsp;&nbsp;<b style="color:var(--green)">≥ 50 pts = Pass</b> &nbsp;|&nbsp; <b style="color:var(--red)">&lt; 50 pts = Fail</b>'}
+    </div>`;
+
+  // Section 1-5
+  const scoreLabels = currentLang==='th'
+    ? ['5<br>ดีมาก','4<br>ดี','3<br>พอใช้','2<br>ปรับปรุง','1<br>ไม่ได้']
+    : ['5<br>Excellent','4<br>Good','3<br>Fair','2<br>Improve','1<br>Cannot'];
+  const scoreHeaders = `<div style="display:grid;grid-template-columns:1fr 56px 56px 56px 56px 56px 1fr;gap:4px;align-items:center;padding:6px 0;border-bottom:2px solid var(--gold-light)">
+    <div style="font-size:11px;font-weight:700;color:var(--gray500)">${currentLang==='th'?'หัวข้อ':'Criteria'}</div>
+    ${scoreLabels.map(l=>`<div style="font-size:10px;font-weight:700;color:var(--gray500);text-align:center">${l}</div>`).join('')}
+    <div style="font-size:11px;font-weight:700;color:var(--gray500)">${currentLang==='th'?'หมายเหตุ':'Remarks'}</div>
+  </div>`;
+
+  ASSESS_SECTIONS.forEach(sec => {
+    html += `<div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gray900);background:var(--gray100);padding:7px 12px;border-radius:8px;margin-bottom:6px">${sec.no}. ${sec.title}</div>`;
+
+    if (sec.type === 'score') {
+      html += scoreHeaders;
+      sec.items.forEach((item, idx) => {
+        const key = `af_s${sec.no}_${idx}`;
+        html += `<div style="display:grid;grid-template-columns:1fr 56px 56px 56px 56px 56px 1fr;gap:4px;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray100)">
+          <div style="font-size:12px;color:var(--gray700)">${item}</div>
+          ${[5,4,3,2,1].map(v=>`<div style="text-align:center"><input type="radio" name="${key}" value="${v}" style="width:16px;height:16px;cursor:pointer" onchange="updateScore()"/></div>`).join('')}
+          <input class="form-input" id="${key}_note" style="font-size:11px;padding:4px 8px" placeholder="${currentLang==='th'?'หมายเหตุ':'Remarks'}"/>
+        </div>`;
+      });
+    } else if (sec.type === 'check') {
+      html += `<div style="display:grid;grid-template-columns:1fr 80px 80px 1fr;gap:4px;align-items:center;padding:6px 0;border-bottom:2px solid var(--gold-light)">
+        <div style="font-size:11px;font-weight:700;color:var(--gray500)">${currentLang==='th'?'หัวข้อ':'Criteria'}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--green);text-align:center">${currentLang==='th'?'✅ ปฏิบัติได้':'✅ Can Perform'}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--red);text-align:center">${currentLang==='th'?'❌ ปฏิบัติไม่ได้':'❌ Cannot Perform'}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gray500)">${currentLang==='th'?'หมายเหตุ':'Remarks'}</div>
+      </div>`;
+      sec.items.forEach((item, idx) => {
+        const key = `af_s${sec.no}_${idx}`;
+        html += `<div style="display:grid;grid-template-columns:1fr 80px 80px 1fr;gap:4px;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray100)">
+          <div style="font-size:12px;color:var(--gray700)">${item}</div>
+          <div style="text-align:center"><input type="radio" name="${key}" value="pass" style="width:16px;height:16px;cursor:pointer"/></div>
+          <div style="text-align:center"><input type="radio" name="${key}" value="fail" style="width:16px;height:16px;cursor:pointer"/></div>
+          <input class="form-input" id="${key}_note" style="font-size:11px;padding:4px 8px" placeholder="${currentLang==='th'?'หมายเหตุ':'Remarks'}"/>
+        </div>`;
+      });
+    } else if (sec.type === 'comment') {
+      html += `<textarea id="af_comment" class="form-textarea" style="min-height:160px;font-size:13px;width:100%" placeholder="${currentLang==='th'?'ความคิดเห็นของผู้ประเมิน...':'Evaluator comments...'}"></textarea>`;
+    }
+    html += `</div>`;
+  });
+
+  // สรุปคะแนน + ผู้ประเมิน
+  html += `
+    <div style="background:var(--gray50);border-radius:10px;padding:14px 16px;border:1px solid var(--gray200);margin-top:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--gray400);text-transform:uppercase;margin-bottom:6px">${currentLang==='th'?'สรุปผลคะแนน (ส่วนที่ 1–5)':'Score Summary (Sections 1–5)'}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="af_score_display" style="font-size:28px;font-weight:800;color:var(--gold)">0</div>
+            <div style="font-size:13px;color:var(--gray400)">/ 60 ${currentLang==='th'?'คะแนน':'pts'}</div>
+            <div id="af_pass_badge"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--gray400);text-transform:uppercase;margin-bottom:6px">${currentLang==='th'?'ผู้ประเมิน *':'Evaluator *'}</div>
+          <select id="af_evaluator" class="form-select">
+            <option value="">${currentLang==='th'?'— เลือกผู้ประเมิน —':'— Select Evaluator —'}</option>
+            ${evalOptions}
+          </select>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('assessFormBody').innerHTML = html;
+  document.getElementById('assessFormMsg').style.display = 'none';
+  document.getElementById('assessFormSaveBtn').disabled = false;
+  document.getElementById('assessFormSaveBtn').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${tr('assessFormSave')}`;
+  document.getElementById('assessFormModal').classList.add('open');
+}
+
+function updateScore() {
+  let total = 0;
+  ASSESS_SECTIONS.filter(s => s.type === 'score').forEach(sec => {
+    sec.items.forEach((_, idx) => {
+      const sel = document.querySelector(`input[name="af_s${sec.no}_${idx}"]:checked`);
+      if (sel) total += parseInt(sel.value);
+    });
+  });
+  document.getElementById('af_score_display').textContent = total;
+  const pass = total >= 50;
+  document.getElementById('af_pass_badge').innerHTML = pass
+    ? `<span class="badge badge-green">${tr('assessPassLabel')}</span>`
+    : `<span class="badge badge-red">${tr('assessFailLabel')}</span>`;
+  document.getElementById('af_score_display').style.color = pass ? 'var(--green)' : 'var(--red)';
+}
+
+function collectAssessData() {
+  const result = { sections: {} };
+  let totalScore = 0;
+
+  ASSESS_SECTIONS.forEach(sec => {
+    if (sec.type === 'score') {
+      const sData = [];
+      sec.items.forEach((item, idx) => {
+        const sel = document.querySelector(`input[name="af_s${sec.no}_${idx}"]:checked`);
+        const score = sel ? parseInt(sel.value) : 0;
+        const note = (document.getElementById(`af_s${sec.no}_${idx}_note`)||{value:''}).value.trim();
+        totalScore += score;
+        sData.push({ item, score, note });
+      });
+      result.sections[sec.no] = { title: sec.title, type: 'score', items: sData };
+    } else if (sec.type === 'check') {
+      const sData = [];
+      sec.items.forEach((item, idx) => {
+        const sel = document.querySelector(`input[name="af_s${sec.no}_${idx}"]:checked`);
+        const val = sel ? sel.value : '';
+        const note = (document.getElementById(`af_s${sec.no}_${idx}_note`)||{value:''}).value.trim();
+        sData.push({ item, result: val, note });
+      });
+      result.sections[sec.no] = { title: sec.title, type: 'check', items: sData };
+    } else if (sec.type === 'comment') {
+      result.sections[sec.no] = { title: sec.title, type: 'comment', comment: (document.getElementById('af_comment')||{value:''}).value.trim() };
+    }
+  });
+
+  result.totalScore = totalScore;
+  result.pass = totalScore >= 50;
+  result.evaluator = (document.getElementById('af_evaluator')||{value:''}).value.trim();
+  result.date = (document.getElementById('af_date')||{value:''}).value.trim();
+  return result;
+}
+
+async function saveAssessForm() {
+  const data = collectAssessData();
+  const msg = document.getElementById('assessFormMsg');
+  const btn = document.getElementById('assessFormSaveBtn');
+
+  if (!data.date) { msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='⚠️ Please enter the exam date'; return; }
+  if (!data.evaluator) { msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='⚠️ Please select an evaluator'; return; }
+
+  // ตรวจสอบว่าทุก item ใน score sections ถูกเลือกแล้ว
+  for (const sec of ASSESS_SECTIONS) {
+    if (sec.type === 'score') {
+      for (let idx = 0; idx < sec.items.length; idx++) {
+        const sel = document.querySelector(`input[name="af_s${sec.no}_${idx}"]:checked`);
+        if (!sel) {
+          msg.style.display='block'; msg.style.color='var(--red)';
+          msg.textContent=`⚠️ Section ${sec.no}: "${sec.items[idx]}" — please select a score`;
+          // Scroll ไปที่ item ที่ยังไม่ได้เลือก
+          const el = document.querySelector(`input[name="af_s${sec.no}_${idx}"]`);
+          if (el) el.closest('div')?.scrollIntoView({behavior:'smooth', block:'center'});
+          return;
+        }
+      }
+    } else if (sec.type === 'check') {
+      for (let idx = 0; idx < sec.items.length; idx++) {
+        const sel = document.querySelector(`input[name="af_s${sec.no}_${idx}"]:checked`);
+        if (!sel) {
+          msg.style.display='block'; msg.style.color='var(--red)';
+          msg.textContent=`⚠️ Section ${sec.no}: "${sec.items[idx]}" — please select Can Perform or Cannot Perform`;
+          const el = document.querySelector(`input[name="af_s${sec.no}_${idx}"]`);
+          if (el) el.closest('div')?.scrollIntoView({behavior:'smooth', block:'center'});
+          return;
+        }
+      }
+    }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = tr('assessFormSaving');
+  msg.style.display = 'block'; msg.style.color = 'var(--gray400)'; msg.textContent = tr('savingData');
+
+  // สร้าง summary text สำหรับบันทึกลง Sheets
+  const summary = buildAssessSummary(data);
+
+  const payload = {
+    type: 'assess_tracker',
+    id: currentAssessId,
+    round: currentAssessRound,   // T1, T2, T3
+    date: data.date,
+    score: data.totalScore,
+    pass: data.pass,
+    evaluator: data.evaluator,
+    summary: summary,            // เก็บลง col N/R/V
+  };
+
+  try {
+    // ส่งข้อมูลไป Apps Script
+    console.log('Sending payload:', JSON.stringify(payload));
+    await fetch('/api/script', { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
+
+    // Update local cache
+    const t = trackerData.find(x => x.id === currentAssessId);
+    if (t) {
+      const tObj = { date: data.date, r: data.pass ? 'PASS' : 'FAIL', comment: summary };
+      if (currentAssessRound === 'T1') t.t1 = tObj;
+      else if (currentAssessRound === 'T2') t.t2 = tObj;
+      else t.t3 = tObj;
+    }
+
+    // Generate PDF + upload to Drive
+    msg.style.color = 'var(--gray400)'; msg.textContent = tr('assessFormPDFGen');
+    const pdf = generateAssessPDF(data, trackerData.find(x=>x.id===currentAssessId));
+    msg.textContent = tr('assessFormUploading');
+    await fetch('/api/script', { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({ type:'save_pdf', filename: pdf.filename, pdfBase64: pdf.base64 }) });
+
+    msg.style.color = 'var(--green)';
+    const resultLabel = data.pass ? tr('assessPassLabel') : tr('assessFailLabel');
+    msg.textContent = tr('assessFormSuccess').replace('{score}',data.totalScore).replace('{result}',resultLabel);
+    btn.innerHTML = tr('assessFormSaved');
+    setTimeout(() => { closeAssessForm(); buildCalendar(calYear, calMonth); renderAssessment(); }, 2000);
+  } catch(e) {
+    msg.style.color = 'var(--red)'; msg.textContent = tr('assessFormSaveFail') + e.message;
+    btn.disabled = false; btn.innerHTML = `💾 ${tr('assessFormSave')}`;
+  }
+}
+
+function buildAssessSummary(data) {
+  const passText = data.pass ? 'ผ่าน' : 'ไม่ผ่าน';
+  let lines = [`[ประเมิน ${data.date}] คะแนน: ${data.totalScore}/60 — ${passText} | ผู้ประเมิน: ${data.evaluator}`];
+  ASSESS_SECTIONS.forEach(sec => {
+    const s = data.sections[sec.no];
+    if (!s) return;
+    if (s.type === 'score') {
+      const scores = s.items.map(i => i.score).join(',');
+      lines.push(`ส่วน${sec.no}(${sec.title}): [${scores}]`);
+    } else if (s.type === 'check') {
+      const vals = s.items.map(i => i.result === 'pass' ? '✓' : i.result === 'fail' ? '✗' : '—').join(',');
+      lines.push(`ส่วน${sec.no}(${sec.title}): [${vals}]`);
+    } else if (s.type === 'comment' && s.comment) {
+      lines.push(`ความคิดเห็น: ${s.comment}`);
+    }
+  });
+  return lines.join('\n');
+}
+
+function generateAssessPDF(data, t) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210, margin = 14, contentW = pageW - margin * 2;
+  let y = 14;
+
+  const addLine = (h=0.3) => { doc.setDrawColor(220,220,220); doc.line(margin, y, pageW-margin, y); y += h; };
+
+  // Header
+  doc.setFillColor(245,236,215);
+  doc.roundedRect(margin, y, contentW, 22, 2, 2, 'F');
+  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(176,122,0);
+  doc.text('The Coral - Staff Management', margin+4, y+8);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(120,80,0);
+  doc.text('Daily Report Assessment Form', margin+4, y+14);
+  doc.setFontSize(8); doc.setTextColor(80,80,80);
+  doc.text(`Round: ${currentAssessRound}  |  Date: ${data.date}  |  Evaluator: ${data.evaluator}`, margin+4, y+19);
+  y += 26;
+
+  // Info box
+  doc.setFillColor(249,250,251);
+  doc.roundedRect(margin, y, contentW, 12, 1, 1, 'F');
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+  doc.text(`Examinee: ${t ? t.name : ''}`, margin+3, y+5);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120,120,120);
+  doc.text(`ID: ${t?t.id:''}  |  Position: ${t?t.pos:''}  |  Start: ${t?t.start:''}  |  Days: ${t?t.days:''}`, margin+3, y+10);
+  y += 16;
+
+  // Criteria note
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+  doc.text('Criteria: 5=Excellent  4=Good  3=Fair  2=Needs Improvement  1=Cannot Perform  |  Pass: >= 50 pts', margin, y);
+  y += 5; addLine();
+
+  // Sections 1-5
+  [1,2,3,4,5].forEach(sNo => {
+    const sec = data.sections[sNo]; if (!sec) return;
+    if (y > 260) { doc.addPage(); y = 14; }
+    doc.setFillColor(243,244,246);
+    doc.roundedRect(margin, y, contentW, 7, 1, 1, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text(`${sNo}. ${sec.title}`, margin+3, y+5);
+    y += 9;
+
+    const colW = [contentW-80, 13, 13, 13, 13, 13, 21];
+    let cx = margin;
+    ['Criteria','5','4','3','2','1','Remarks'].forEach((h,i) => {
+      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+      doc.text(h, cx+(i===0?1:colW[i]/2), y+4, {align:i===0?'left':'center'});
+      cx += colW[i];
+    });
+    y += 7; addLine();
+
+    sec.items.forEach(item => {
+      if (y > 265) { doc.addPage(); y = 14; }
+      const rowH = 8;
+      cx = margin;
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+      const lines = doc.splitTextToSize(item.item, colW[0]-2);
+      const actualH = Math.max(rowH, lines.length * 4 + 2);
+      doc.text(lines, cx+1, y+4);
+      cx += colW[0];
+      [5,4,3,2,1].forEach((v,i) => {
+        const cx2 = cx + colW[i+1]/2;
+        if (item.score === v) {
+          doc.setFillColor(176,122,0); doc.circle(cx2, y+actualH/2, 2.5, 'F');
+          doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+          doc.text(String(v), cx2, y+actualH/2+1.2, {align:'center'});
+        } else {
+          doc.setDrawColor(180,180,180); doc.circle(cx2, y+actualH/2, 2.5, 'S');
+          doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.setTextColor(160,160,160);
+          doc.text(String(v), cx2, y+actualH/2+1.2, {align:'center'});
+        }
+        cx += colW[i+1];
+      });
+      doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+      doc.text(item.note||'', cx+1, y+4);
+      y += actualH; addLine(0);
+    });
+    y += 3;
+  });
+
+  // Section 6 (check)
+  if (y > 255) { doc.addPage(); y = 14; }
+  const sec6 = data.sections[6];
+  if (sec6) {
+    doc.setFillColor(243,244,246);
+    doc.roundedRect(margin, y, contentW, 7, 1, 1, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text('6. ' + sec6.title, margin+3, y+5);
+    y += 9;
+    const c6 = [contentW-50, 22, 22];
+    let cx = margin;
+    [['Criteria','left'],['Can Perform','center'],['Cannot Perform','center']].forEach(([h,a],i) => {
+      doc.setFontSize(7); doc.setFont('helvetica','bold');
+      if(i===1) doc.setTextColor(22,163,74); else if(i===2) doc.setTextColor(220,38,38); else doc.setTextColor(100,100,100);
+      doc.text(h, cx+(a==='center'?c6[i]/2:2), y+4, {align:a});
+      cx += c6[i];
+    });
+    y += 7; addLine();
+    sec6.items.forEach(item => {
+      if (y > 265) { doc.addPage(); y = 14; }
+      cx = margin;
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+      doc.text(item.item, cx+1, y+5);
+      cx += c6[0];
+      if(item.result==='pass'){doc.setFillColor(22,163,74);doc.circle(cx+c6[1]/2,y+4,2.5,'F');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text('v',cx+c6[1]/2,y+5.2,{align:'center'});}
+      else{doc.setDrawColor(180,180,180);doc.circle(cx+c6[1]/2,y+4,2.5,'S');}
+      cx += c6[1];
+      if(item.result==='fail'){doc.setFillColor(220,38,38);doc.circle(cx+c6[2]/2,y+4,2.5,'F');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text('x',cx+c6[2]/2,y+5.2,{align:'center'});}
+      else{doc.setDrawColor(180,180,180);doc.circle(cx+c6[2]/2,y+4,2.5,'S');}
+      y += 9; addLine(0);
+    });
+    y += 3;
+  }
+
+  // Section 7 (comment)
+  if (y > 240) { doc.addPage(); y = 14; }
+  const sec7 = data.sections[7];
+  doc.setFillColor(243,244,246);
+  doc.roundedRect(margin, y, contentW, 7, 1, 1, 'F');
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+  doc.text('7. Comments', margin+3, y+5);
+  y += 9;
+  const commentText = sec7?.comment || '';
+  const commentLines = doc.splitTextToSize(commentText || '-', contentW-4);
+  const commentH = Math.max(20, commentLines.length * 4.5 + 4);
+  doc.setDrawColor(220,220,220); doc.roundedRect(margin, y, contentW, commentH, 1, 1, 'S');
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+  doc.text(commentLines, margin+3, y+5);
+  y += commentH + 6;
+
+  // Score summary
+  if (y > 250) { doc.addPage(); y = 14; }
+  const passColor = data.pass ? [22,163,74] : [220,38,38];
+  doc.setFillColor(...(data.pass ? [220,252,231] : [254,226,226]));
+  doc.roundedRect(margin, y, contentW, 18, 2, 2, 'F');
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...passColor);
+  doc.text(`Total Score: ${data.totalScore} / 60  -  ${data.pass ? 'PASS' : 'FAIL - Retake Next Round'}`, margin+4, y+8);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+  doc.text('Pass criteria: 50 points or above', margin+4, y+14);
+  y += 22;
+
+  // Signature
+  if (y > 255) { doc.addPage(); y = 14; }
+  const sigY = y + 8;
+  doc.setDrawColor(150,150,150);
+  doc.line(margin, sigY, margin+60, sigY);
+  doc.line(pageW-margin-60, sigY, pageW-margin, sigY);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+  doc.text('Examinee', margin+30, sigY+5, {align:'center'});
+  doc.text('Evaluator', pageW-margin-30, sigY+5, {align:'center'});
+  doc.text(data.evaluator||'', pageW-margin-30, sigY+10, {align:'center'});
+  doc.setFontSize(7);
+  doc.text(`Date: ${data.date}`, pageW-margin-30, sigY+15, {align:'center'});
+
+  // Save
+  const fname = `Assessment_${t?t.name.replace(/\s/g,'_'):'staff'}_${currentAssessRound}_${data.date.replace(/\//g,'-')}.pdf`;
+  doc.save(fname);
+  return { base64: doc.output('datauristring').split(',')[1], filename: fname };
+}
+
+function closeAssessForm() {
+  document.getElementById('assessFormModal').classList.remove('open');
+}
+
+// ── ADD MODAL ──
+function openAddModal(type){
+  currentEditType = type;
+  currentEditId = '';
+  const msg = document.getElementById('modalSaveMsg');
+  msg.style.display='none'; msg.textContent='';
+  const saveBtn = document.getElementById('modalSaveBtn');
+  saveBtn.style.display = '';
+  saveBtn.disabled = false;
+  saveBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${tr('modalSave')}`;
+
+  const posOptions = ['GSC Supervisor','Duty Manager','Supervisor','Sr. CSA','CSA']
+    .map(p=>`<option value="${p}">${p}</option>`).join('');
+
+  if(type === 'staff'){
+    document.getElementById('modalTitle').textContent = tr('addStaffTitle');
+    document.getElementById('modalBody').innerHTML = `
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">${tr('formName')}</label><input id="a_name" class="form-input" placeholder="${currentLang==='th'?'ชื่อ นามสกุล':'Full name'}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formId5')}</label><input id="a_id" class="form-input" placeholder="${currentLang==='th'?'เช่น 41700':'e.g. 41700'}" maxlength="5"/></div>
+        <div class="form-group"><label class="form-label">${tr('formPosition')}</label>
+          <select id="a_pos" class="form-select"><option value="">${tr('formSelectPos')}</option>${posOptions}</select>
+        </div>
+        <div class="form-group"><label class="form-label">${tr('formStartDate')}</label><input id="a_start" class="form-input" placeholder="${currentLang==='th'?'เช่น 1/6/2569':'e.g. 1/6/2025'}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formStatus')}</label>
+          <select id="a_status" class="form-select">
+            <option value="Active">Active</option>
+            <option value="Probation">Probation</option>
+            <option value="Resigned">Resigned</option>
+          </select>
+        </div>
+      </div>
+      <div class="gs-link-note" style="margin-top:12px">${tr('addStaffNote')}</div>`;
+  } else {
+    document.getElementById('modalTitle').textContent = tr('addTraineeTitle');
+    document.getElementById('modalBody').innerHTML = `
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">${tr('formName')}</label><input id="a_name" class="form-input" placeholder="${currentLang==='th'?'ชื่อ นามสกุล':'Full name'}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formIdT')}</label><input id="a_id" class="form-input" placeholder="${currentLang==='th'?'เช่น 6701':'e.g. 6701'}" maxlength="5"/></div>
+        <div class="form-group"><label class="form-label">${tr('formPosition')}</label>
+          <select id="a_pos" class="form-select"><option value="Student trainee">Student trainee</option>${posOptions}</select>
+        </div>
+        <div class="form-group"><label class="form-label">${tr('formStartDate')}</label><input id="a_start" class="form-input" placeholder="${currentLang==='th'?'เช่น 1/6/2569':'e.g. 1/6/2025'}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formEndDate')}</label><input id="a_end" class="form-input" placeholder="${currentLang==='th'?'เช่น 31/8/2569':'e.g. 31/8/2025'}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formStatus')}</label>
+          <select id="a_status" class="form-select"><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+        </div>
+        <div class="form-group full"><label class="form-label">${tr('formComment')}</label><textarea id="a_comment" class="form-textarea" placeholder="${currentLang==='th'?'หมายเหตุ...':'Notes...'}"></textarea></div>
+      </div>
+      <div class="gs-link-note" style="margin-top:12px">${tr('addTraineeNote')}</div>`;
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+
+async function saveAddModal(){
+  const type = currentEditType;
+  const name = (document.getElementById('a_name')||{value:''}).value.trim();
+  const id   = (document.getElementById('a_id')||{value:''}).value.trim();
+  const pos  = (document.getElementById('a_pos')||{value:''}).value.trim();
+  const start= (document.getElementById('a_start')||{value:''}).value.trim();
+  const status=(document.getElementById('a_status')||{value:'Active'}).value.trim();
+  const msg  = document.getElementById('modalSaveMsg');
+
+  if(!name || !id || !pos || !start){
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent=currentLang==='th'?'⚠️ กรุณากรอกข้อมูลที่มี * ให้ครบ':'⚠️ Please fill in all required (*) fields';
+    return;
+  }
+
+  const btn = document.getElementById('modalSaveBtn');
+  btn.disabled=true; btn.innerHTML=tr('assessFormSaving');
+  msg.style.display='block'; msg.style.color='var(--gray400)'; msg.textContent=tr('savingData');
+
+  const payload = { type: 'add_'+type, name, id, pos, start, status };
+  if(type==='trainee'){
+    payload.end     = (document.getElementById('a_end')||{value:''}).value.trim();
+    payload.comment = (document.getElementById('a_comment')||{value:''}).value.trim();
+  }
+
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+    msg.style.color='var(--green)'; msg.textContent=tr('saveSuccess');
+    btn.innerHTML=tr('assessFormSaved');
+    setTimeout(()=>{ closeEditModal(); refreshAll(); }, 1500);
+  }catch(e){
+    msg.style.color='var(--red)'; msg.textContent=tr('saveFail')+e.message;
+    btn.disabled=false; btn.innerHTML=`💾 ${tr('modalSave')}`;
+  }
+}
+
+// ── EDIT MODAL ──
+let currentEditGid=GID_STAFF,currentEditType='',currentEditId='';
+function openEditModal(type,id){
+  currentEditGid=type==='tracker'?GID_TRACKER:GID_STAFF;
+  currentEditType=type;currentEditId=id;
+  const data=type==='tracker'?trackerData:staffData;
+  const s=data.find(x=>x.id===id);if(!s)return;
+  const msg=document.getElementById('modalSaveMsg');msg.style.display='none';msg.textContent='';
+  const saveBtn=document.getElementById('modalSaveBtn');
+  saveBtn.style.display=(type==='tracker'&&SCRIPT_URL)?'':'none';
+  document.getElementById('modalTitle').textContent=`✎ ${currentLang==='th'?'แก้ไข':'Edit'}: ${s.name}`;
+  if(type==='staff'){
+    const posOptions=['GSC Supervisor','Duty Manager','Supervisor','Sr. CSA','CSA']
+      .map(p=>`<option value="${p}" ${s.pos===p?'selected':''}>${p}</option>`).join('');
+    document.getElementById('modalBody').innerHTML=`
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">${tr('formName')}</label><input id="f_name" class="form-input" value="${s.name}"/></div>
+        <div class="form-group"><label class="form-label">${currentLang==='th'?'รหัสพนักงาน':'Employee ID'}</label><input class="form-input" value="${s.id}" readonly style="background:var(--gray50);color:var(--gray400)"/></div>
+        <div class="form-group"><label class="form-label">${tr('formPosition')}</label>
+          <select id="f_pos" class="form-select"><option value="">${tr('formSelectPos')}</option>${posOptions}</select>
+        </div>
+        <div class="form-group"><label class="form-label">${tr('formStartDate').replace(' *','')}</label><input id="f_start" class="form-input" placeholder="DD/MM/YYYY" value="${s.start}"/></div>
+        <div class="form-group"><label class="form-label">${tr('formStatus')}</label>
+          <select id="f_status" class="form-select">
+            <option value="Active" ${s.status==='Active'?'selected':''}>Active</option>
+            <option value="Probation" ${s.status==='Probation'?'selected':''}>Probation</option>
+            <option value="Resigned" ${s.status==='Resigned'?'selected':''}>Resigned</option>
+          </select>
+        </div>
+      </div>`;
+    saveBtn.style.display='';
+  }else{
+    const hasT3=(s.t1.r==='FAIL'&&s.t2.r==='FAIL')||(s.t3&&s.t3.date&&s.t3.date!=='—');
+    document.getElementById('modalBody').innerHTML=`
+      <div style="background:var(--gray50);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--gray500)">${posBadge(s.pos)} &nbsp; ${s.id} &nbsp;·&nbsp; ${currentLang==='th'?'เริ่ม':'Start'} ${s.start} &nbsp;·&nbsp; ${s.days} ${currentLang==='th'?'วัน':'days'}</div>
+      <div class="form-section" style="margin-top:0">${currentLang==='th'?'ผลการทดสอบ T1':'Test Results T1'}</div>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="form-group"><label class="form-label">${currentLang==='th'?'T1 วันที่สอบ':'T1 Exam Date'}</label><input id="f_t1_date" class="form-input" placeholder="DD/MM/YYYY" value="${s.t1.date&&s.t1.date!=='—'?s.t1.date:''}"/></div>
+        <div class="form-group"><label class="form-label">${currentLang==='th'?'T1 ผล':'T1 Result'}</label><select id="f_t1_r" class="form-select"><option value="">${currentLang==='th'?'— ยังไม่มีผล —':'— No result —'}</option><option value="PASS" ${s.t1.r==='PASS'?'selected':''}>✓ PASS</option><option value="FAIL" ${s.t1.r==='FAIL'?'selected':''}>✗ FAIL</option></select></div>
+        <div class="form-group full"><label class="form-label">T1 Comment</label><textarea id="f_t1_comment" class="form-textarea">${s.t1.comment||''}</textarea></div>
+      </div>
+      <div class="form-section">${currentLang==='th'?'ผลการทดสอบ T2':'Test Results T2'}</div>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="form-group"><label class="form-label">${currentLang==='th'?'T2 วันที่สอบ':'T2 Exam Date'}</label><input id="f_t2_date" class="form-input" placeholder="DD/MM/YYYY" value="${s.t2.date&&s.t2.date!=='—'?s.t2.date:''}"/></div>
+        <div class="form-group"><label class="form-label">${currentLang==='th'?'T2 ผล':'T2 Result'}</label><select id="f_t2_r" class="form-select"><option value="">${currentLang==='th'?'— ยังไม่มีผล —':'— No result —'}</option><option value="PASS" ${s.t2.r==='PASS'?'selected':''}>✓ PASS</option><option value="FAIL" ${s.t2.r==='FAIL'?'selected':''}>✗ FAIL</option></select></div>
+        <div class="form-group full"><label class="form-label">T2 Comment</label><textarea id="f_t2_comment" class="form-textarea">${s.t2.comment||''}</textarea></div>
+      </div>
+      ${hasT3?`<div class="form-section">${currentLang==='th'?'ผลการทดสอบ T3':'Test Results T3'}</div><div class="form-grid" style="margin-top:8px"><div class="form-group"><label class="form-label">${currentLang==='th'?'T3 วันที่สอบ':'T3 Exam Date'}</label><input id="f_t3_date" class="form-input" placeholder="DD/MM/YYYY" value="${s.t3&&s.t3.date&&s.t3.date!=='—'?s.t3.date:''}"/></div><div class="form-group"><label class="form-label">${currentLang==='th'?'T3 ผล':'T3 Result'}</label><select id="f_t3_r" class="form-select"><option value="">${currentLang==='th'?'— ยังไม่มีผล —':'— No result —'}</option><option value="PASS" ${s.t3&&s.t3.r==='PASS'?'selected':''}>✓ PASS</option><option value="FAIL" ${s.t3&&s.t3.r==='FAIL'?'selected':''}>✗ FAIL</option></select></div><div class="form-group full"><label class="form-label">T3 Comment</label><textarea id="f_t3_comment" class="form-textarea">${s.t3&&s.t3.comment||''}</textarea></div></div>`:''}
+      <div class="form-section">Milestone</div>
+      <div class="form-grid" style="margin-top:8px">${[60,90,119].map(day=>{const ms=s.milestones.find(m=>m.day===day);const dayLbl=currentLang==='th'?`${day} วัน`:`${day} Days`;return`<div class="form-group"><label class="form-label">${dayLbl} — ${currentLang==='th'?'วันที่':'Date'}</label><input id="f_ms${day}_date" class="form-input" placeholder="DD/MM/YYYY" value="${ms&&ms.date&&ms.date!=='N/A'?ms.date:''}"/></div><div class="form-group"><label class="form-label">${dayLbl} — Comment</label><input id="f_ms${day}_comment" class="form-input" value="${ms?ms.comment:''}"/></div>`;}).join('')}</div>`;
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+
+async function saveModal(){
+  // ถ้าเป็น Add mode
+  if(document.getElementById('a_name')) return saveAddModal();
+  if(!SCRIPT_URL)return;
+  // Staff edit
+  if(currentEditType==='staff'){
+    const btn=document.getElementById('modalSaveBtn'),msg=document.getElementById('modalSaveMsg');
+    btn.disabled=true;btn.innerHTML=tr('assessFormSaving');
+    msg.style.display='block';msg.style.color='var(--gray400)';msg.textContent=tr('savingData');
+    const val=id=>(document.getElementById(id)||{value:''}).value.trim();
+    const payload={type:'edit_staff',id:currentEditId,name:val('f_name'),pos:val('f_pos'),start:val('f_start'),status:val('f_status')};
+    try{
+      await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+      msg.style.color='var(--green)';msg.textContent=tr('saveSuccessMsg');btn.innerHTML=tr('assessFormSaved');
+      const s=staffData.find(x=>x.id===currentEditId);
+      if(s){s.name=payload.name||s.name;s.pos=payload.pos||s.pos;s.start=payload.start||s.start;s.status=payload.status||s.status;}
+      setTimeout(()=>{closeEditModal();renderStaff();},1200);
+    }catch(e){msg.style.color='var(--red)';msg.textContent=tr('saveFail')+e.message;btn.disabled=false;btn.innerHTML=`💾 ${tr('modalSave')}`;}
+    return;
+  }
+  if(currentEditType!=='tracker')return;
+  const btn=document.getElementById('modalSaveBtn'),msg=document.getElementById('modalSaveMsg');
+  btn.disabled=true;btn.innerHTML=tr('assessFormSaving');
+  msg.style.display='block';msg.style.color='var(--gray400)';msg.textContent=tr('savingData');
+  const val=id=>(document.getElementById(id)||{value:''}).value.trim();
+  const t3el=document.getElementById('f_t3_date');
+  const payload={type:'tracker',id:currentEditId,
+    t1:{date:val('f_t1_date'),r:val('f_t1_r'),comment:val('f_t1_comment')},
+    t2:{date:val('f_t2_date'),r:val('f_t2_r'),comment:val('f_t2_comment')},
+    ms60:{date:val('f_ms60_date'),comment:val('f_ms60_comment')},
+    ms90:{date:val('f_ms90_date'),comment:val('f_ms90_comment')},
+    ms119:{date:val('f_ms119_date'),comment:val('f_ms119_comment')},
+  };
+  if(t3el)payload.t3={date:val('f_t3_date'),r:val('f_t3_r'),comment:val('f_t3_comment')};
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+    msg.style.color='var(--green)';msg.textContent=tr('saveSuccessMsg');btn.innerHTML=tr('assessFormSaved');
+    const t=trackerData.find(x=>x.id===currentEditId);
+    if(t){t.t1={...t.t1,date:payload.t1.date||t.t1.date,r:payload.t1.r||t.t1.r,comment:payload.t1.comment};t.t2={...t.t2,date:payload.t2.date||t.t2.date,r:payload.t2.r||t.t2.r,comment:payload.t2.comment};if(payload.t3)t.t3={...t.t3,date:payload.t3.date||t.t3.date,r:payload.t3.r||t.t3.r,comment:payload.t3.comment};}
+    setTimeout(()=>{closeEditModal();buildCalendar(calYear,calMonth);renderAssessment();},1200);
+  }catch(e){msg.style.color='var(--red)';msg.textContent=tr('saveFail')+e.message;btn.disabled=false;btn.innerHTML=`💾 ${tr('modalSave')}`;}
+}
+
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('open');
+  const btn=document.getElementById('modalSaveBtn');
+  btn.disabled=false;btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${tr('modalSave')}`;
+}
+function closeModalOutside(e){if(e.target.id==='editModal')closeEditModal();}
+
+// ── SEARCH ──
+function handleSearch(){applyStaffFilter();applyLeaveFilter();applyAssessFilter();applyTraineeFilter();}
+
+// ── PAGINATION ──
+function renderPageBtns(containerId,total,current,onPage){
+  const c=document.getElementById(containerId);c.innerHTML='';
+  for(let i=1;i<=total;i++){const btn=document.createElement('button');btn.className='page-btn'+(i===current?' active':'');btn.textContent=i;btn.onclick=()=>onPage(i);c.appendChild(btn);}
+}
+
+// ── BUILD ALL ──
+function buildAll(){buildDashboard();buildStaff();buildAssessment();buildLeave();buildTrainee();applyStaticI18n();}
+
+// ── USER MANAGEMENT ──
+window.currentUser = null;
+let usersData = [];
+let editingUsername = '';
+
+function roleBadge(role) {
+  if (role === 'admin') return `<span class="badge badge-gold">admin</span>`;
+  if (role === 'manager') return `<span class="badge badge-teal">manager</span>`;
+  return `<span class="badge badge-gray">staff</span>`;
+}
+
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/users');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    usersData = await r.json();
+    renderUsers();
+  } catch(e) {
+    console.error('loadUsers error', e);
+  }
+}
+
+function renderUsers() {
+  const tbody = document.getElementById('usersBody');
+  if (!tbody) return;
+  if (!usersData.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div>${tr('emptyState')}</div></td></tr>`;
+    return;
+  }
+  const delLabel = currentLang === 'th' ? 'ลบ' : 'Delete';
+  tbody.innerHTML = usersData.map((u, i) => `<tr>
+    <td style="color:var(--gray400);font-size:12px">${i + 1}</td>
+    <td><div class="td-name">${u.displayName || '—'}</div></td>
+    <td><div class="td-sub" style="font-family:monospace;font-size:12px">${u.username}</div></td>
+    <td>${roleBadge(u.role)}</td>
+    <td style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-outline btn-sm" onclick="openEditUserModal('${u.username}')">✎</button>
+      <button class="btn btn-sm" id="del-btn-${u.username}" style="background:var(--red-light);color:var(--red);border:none" onclick="deleteUser('${u.username}',this)">${delLabel}</button>
+    </td>
+  </tr>`).join('');
+}
+
+function openAddUserModal() {
+  document.getElementById('au_displayName').value = '';
+  document.getElementById('au_username').value = '';
+  document.getElementById('au_password').value = '';
+  document.getElementById('au_role').value = 'staff';
+  const msg = document.getElementById('au_msg');
+  msg.style.display = 'none';
+  document.getElementById('addUserModal').classList.add('open');
+}
+function closeAddUserModal() {
+  document.getElementById('addUserModal').classList.remove('open');
+}
+
+async function saveAddUser() {
+  const msg = document.getElementById('au_msg');
+  const body = {
+    displayName: document.getElementById('au_displayName').value.trim(),
+    username: document.getElementById('au_username').value.trim(),
+    password: document.getElementById('au_password').value,
+    role: document.getElementById('au_role').value,
+  };
+  msg.style.display = 'block';
+  msg.style.color = 'var(--gray400)';
+  msg.textContent = tr('savingData');
+  try {
+    const r = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await r.json();
+    if (data.success) {
+      msg.style.color = 'var(--green)'; msg.textContent = tr('userSaveOk');
+      setTimeout(() => { closeAddUserModal(); loadUsers(); }, 800);
+    } else {
+      msg.style.color = 'var(--red)'; msg.textContent = tr('userSaveFail') + data.message;
+    }
+  } catch(e) { msg.style.color = 'var(--red)'; msg.textContent = tr('userSaveFail') + e.message; }
+}
+
+function openEditUserModal(username) {
+  const u = usersData.find(x => x.username === username);
+  if (!u) return;
+  editingUsername = username;
+  document.getElementById('eu_displayName').value = u.displayName || '';
+  document.getElementById('eu_password').value = '';
+  document.getElementById('eu_role').value = u.role || 'staff';
+  // Hide role select if editing self
+  const roleGroup = document.getElementById('eu_role_group');
+  roleGroup.style.display = (currentUser && currentUser.username === username) ? 'none' : '';
+  const msg = document.getElementById('eu_msg');
+  msg.style.display = 'none';
+  document.getElementById('editUserModal').classList.add('open');
+}
+function closeEditUserModal() {
+  document.getElementById('editUserModal').classList.remove('open');
+}
+
+async function saveEditUser() {
+  const msg = document.getElementById('eu_msg');
+  const body = {
+    displayName: document.getElementById('eu_displayName').value.trim(),
+    role: document.getElementById('eu_role').value,
+  };
+  const pw = document.getElementById('eu_password').value;
+  if (pw) body.password = pw;
+  msg.style.display = 'block';
+  msg.style.color = 'var(--gray400)';
+  msg.textContent = tr('savingData');
+  try {
+    const r = await fetch('/api/users/' + encodeURIComponent(editingUsername), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await r.json();
+    if (data.success) {
+      msg.style.color = 'var(--green)'; msg.textContent = tr('userSaveOk');
+      setTimeout(() => { closeEditUserModal(); loadUsers(); }, 800);
+    } else {
+      msg.style.color = 'var(--red)'; msg.textContent = tr('userSaveFail') + data.message;
+    }
+  } catch(e) { msg.style.color = 'var(--red)'; msg.textContent = tr('userSaveFail') + e.message; }
+}
+
+function deleteUser(username, btn) {
+  if (btn.dataset.confirm !== '1') {
+    btn.dataset.confirm = '1';
+    const origText = btn.textContent;
+    btn.textContent = tr('confirmDelete');
+    btn.style.background = 'var(--red)';
+    btn.style.color = '#fff';
+    setTimeout(() => {
+      if (btn.dataset.confirm === '1') {
+        btn.dataset.confirm = '';
+        btn.textContent = origText;
+        btn.style.background = 'var(--red-light)';
+        btn.style.color = 'var(--red)';
+      }
+    }, 3000);
+    return;
+  }
+  btn.dataset.confirm = '';
+  fetch('/api/users/' + encodeURIComponent(username), { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) loadUsers();
+      else alert(tr('userDeleteFail') + data.message);
+    })
+    .catch(e => alert(tr('userDeleteFail') + e.message));
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+// ── INIT ──
+(async()=>{
+  try {
+    // Fetch current user
+    try {
+      const meRes = await fetch('/api/me');
+      if (meRes.ok) {
+        window.currentUser = await meRes.json();
+        if (window.currentUser && window.currentUser.role === 'admin') {
+          document.getElementById('nav-admin-label').style.display = '';
+          document.getElementById('nav-users-btn').style.display = '';
+        }
+      }
+    } catch(e) { console.warn('Could not fetch /api/me', e); }
+
+    const ok=await loadAll();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    if(ok)buildAll();
+  } catch(e) {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    const b=document.getElementById('errorBanner');
+    b.innerHTML=`❌ <b>JavaScript Error:</b> ${e.message}<br><small>${e.stack||''}</small>`;
+    b.classList.add('show');
+    b.classList.add('show');
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
