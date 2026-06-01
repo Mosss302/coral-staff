@@ -27,11 +27,55 @@ function getSession(req) {
   return session;
 }
 
-// Load users from users.json
-let users = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8'));
+// Load users from users.json (fallback)
+let localUsers = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8'));
 
-function saveUsers() {
-  fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(users, null, 2), 'utf8');
+// Sheet-based user cache
+const USERS_SHEET_GID = '1316186617';
+let usersCache = null;
+let usersCacheTime = 0;
+const USERS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function fetchUsersFromSheet() {
+  return new Promise((resolve) => {
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${USERS_SHEET_GID}`;
+    function doReq(targetUrl, hops) {
+      if (hops > 5) return resolve(null);
+      const parsed = url.parse(targetUrl);
+      const req = https.request({ hostname: parsed.hostname, path: parsed.path, method: 'GET',
+        headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+        if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+          return doReq(r.headers.location, hops + 1);
+        }
+        let csv = '';
+        r.on('data', d => csv += d);
+        r.on('end', () => {
+          try {
+            const lines = csv.trim().split('\n').slice(1); // skip header row
+            const parsed2 = lines.map(line => {
+              const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+              return { displayName: cols[0], username: cols[1], password: cols[2], role: cols[3] || 'staff' };
+            }).filter(u => u.username);
+            resolve(parsed2);
+          } catch (e) { resolve(null); }
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.end();
+    }
+    doReq(sheetUrl, 0);
+  });
+}
+
+async function getUsers() {
+  if (usersCache && Date.now() - usersCacheTime < USERS_CACHE_TTL) return usersCache;
+  const sheetUsers = await fetchUsersFromSheet();
+  if (sheetUsers && sheetUsers.length > 0) {
+    usersCache = sheetUsers;
+    usersCacheTime = Date.now();
+    return usersCache;
+  }
+  return localUsers; // fallback
 }
 
 // ── Static files ─────────────────────────────────────────────────────────────
@@ -128,7 +172,7 @@ function proxyAppsScript(body, res) {
 
 // ── Server ────────────────────────────────────────────────────────────────────
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url, true);
   const pathname = parsed.pathname;
 
@@ -136,11 +180,12 @@ const server = http.createServer((req, res) => {
   if (pathname === '/login' && req.method === 'POST') {
     let body = '';
     req.on('data', d => body += d);
-    req.on('end', () => {
+    req.on('end', async () => {
       let creds;
       try { creds = JSON.parse(body); } catch (e) { creds = {}; }
       const { username, password } = creds;
-      const user = users.find(u => u.username === username && u.password === password);
+      const allUsers = await getUsers();
+      const user = allUsers.find(u => u.username === username && u.password === password);
       if (!user) {
         res.writeHead(401, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Invalid username or password' }));
@@ -210,8 +255,9 @@ const server = http.createServer((req, res) => {
     const session = getSession(req);
     if (!session) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
     if (session.role !== 'admin') { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden' })); return; }
+    const allUsers = await getUsers();
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(users.map(u => ({ username: u.username, role: u.role, displayName: u.displayName }))));
+    res.end(JSON.stringify(allUsers.map(u => ({ username: u.username, role: u.role, displayName: u.displayName }))));
     return;
   }
 
