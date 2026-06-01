@@ -58,18 +58,50 @@ function callAppsScript(payload) {
   });
 }
 
-// ── User management via Apps Script (with local fallback) ────────────────────
+// ── User management — read from CSV, write via Apps Script ───────────────────
 
 const localUsers = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8'));
+const USERS_SHEET_GID = '1316186617';
 let usersCache = null;
 let usersCacheTime = 0;
-const USERS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const USERS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+function fetchUsersCSV() {
+  return new Promise((resolve) => {
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${USERS_SHEET_GID}`;
+    function doReq(targetUrl, hops) {
+      if (hops > 5) return resolve(null);
+      const parsed = url.parse(targetUrl);
+      const req = https.request({
+        hostname: parsed.hostname, path: parsed.path, method: 'GET',
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      }, (r) => {
+        if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) return doReq(r.headers.location, hops + 1);
+        let csv = '';
+        r.on('data', d => csv += d);
+        r.on('end', () => {
+          try {
+            const users = csv.trim().split('\n').slice(1)
+              .map(line => {
+                const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                return { displayName: cols[0], username: cols[1], password: String(cols[2]), role: cols[3] || 'staff' };
+              }).filter(u => u.username);
+            resolve(users.length > 0 ? users : null);
+          } catch(e) { resolve(null); }
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.end();
+    }
+    doReq(sheetUrl, 0);
+  });
+}
 
 async function getUsers() {
   if (usersCache && Date.now() - usersCacheTime < USERS_CACHE_TTL) return usersCache;
-  const result = await callAppsScript({ type: 'get_users' });
-  if (result && result.status === 'ok' && result.users && result.users.length > 0) {
-    usersCache = result.users;
+  const csvUsers = await fetchUsersCSV();
+  if (csvUsers) {
+    usersCache = csvUsers;
     usersCacheTime = Date.now();
     return usersCache;
   }
